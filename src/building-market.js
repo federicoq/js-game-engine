@@ -88,6 +88,10 @@ function market() {
 
 		var items = _.cloneDeep(world.warehouse_inventory);
 
+		items = _.filter(items, function(e) {
+			return e.market != undefined;
+		});
+
 		_.each(items, function(i) {
 
 			var prices = i.market.wallets;

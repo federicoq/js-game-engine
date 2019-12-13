@@ -24,6 +24,10 @@ function blank_entity(self, starting, wireframe, config) {
 	config = _.assign(wireframe, config);
 	self.id = _.uniqueId(starting);
 
+	self.level = 0;
+	self.history = {};
+	self.before_level = [];
+
 	_.each(config, function(value,key) { self[key] = value; }.bind(self));
 
 	if(self.config == undefined) self.config = { __addPlease: true };
@@ -67,7 +71,15 @@ function blank_entity(self, starting, wireframe, config) {
  *
  * This is the controller and container of all the game logic.
  */
-function Game() {
+function Game(base_objects) {
+
+	this.base_objects = base_objects;
+
+	//////////////////////
+	// Game Status Manager
+	// 
+	// 
+
 
 	////////////////////////////
 	// Base Objects Manipolation
@@ -423,7 +435,98 @@ function Game() {
 	// 
 	// 
 
-	this.level = [];
+	this.levels = [];
+	this.level = false;
+	this.level_watcher = false;
+
+	this.level_add = function(level) {
+		this.levels.push(level);
+	}
+
+	this.level_start = function(level) {
+
+		// First.. we need to check if we can actually activate this level ^_^
+		var qty = this.wallet(this.level_watcher).quantity;
+
+		if(qty >= level.range[0] && qty < level.range[1]) {
+
+			if(this.level != false) {
+
+				if(this.level.deactivate != undefined) {
+					this.level.deactivate(this);
+				}
+
+			}
+
+			this.level = level;
+			this.level.activate(this);
+
+			// Cycle all the items, looking for a specific method
+			// to be triggered for the specific id level!
+
+			_.each(this.base_objects, function(a) {
+
+				var objs = this.base_gets(a);
+
+				_.each(objs, function(single_object) {
+
+					if(single_object.levels != undefined) {
+						if(single_object.levels[level.id] != undefined) {
+
+							// We need first to loop before_level object..
+							_.each(single_object.before_level, function(single) {
+								single(this);
+							}.bind(this));
+
+							single_object.levels[level.id](this);
+						}
+					}
+
+				}.bind(this));
+
+			}.bind(this));
+
+			console.log(this.base_objects);
+
+		} else {
+			console.error("You don't match the request for this level!");
+			return false;
+		}
+
+	}
+
+	this.level_tick = function(tick) {
+
+		var qty = this.wallet(this.level_watcher).quantity;
+
+		// if there isn't a level right now.. looking for the best one :D
+		if(this.level == false) {
+
+			var validLevels = _.filter(this.levels, function(a) {
+				return qty >= a.range[0] && qty < a.range[1];
+			});
+
+			if(validLevels.length > 0) {
+				this.level_start(_.cloneDeep(validLevels[0]));
+			}
+
+		} else {
+
+			if(qty >= this.level.range[1]) {
+				
+				var validLevels = _.filter(this.levels, function(a) {
+					return qty >= a.range[0] && qty < a.range[1];
+				});
+
+				if(validLevels.length > 0) {
+					this.level_start(_.cloneDeep(validLevels[0]));
+				}
+
+			}
+
+		}
+
+	}
 
 	////////////////////////////
 	// Base Objects Interactions
@@ -522,6 +625,9 @@ function Game() {
 	this.tick = function() {
 
 		this._s.tick++;
+
+		this.level_tick(this._s.tick);
+
 		// Cycle all the objects, and trig for them the "tick" event.
 		_.each(base_objects, function(entity) {
 			_.each(this[entity], function(singleEntity) {
@@ -575,6 +681,7 @@ function wallet(config) {
 		if(this.float == false) { qty = _.ceil(qty); }
 		if(this.quantity + qty <= this.max_quantity || this.max_quantity == 0) {
 			this.quantity += qty;
+			this.quantity = parseFloat(this.quantity.toFixed(3))
 		} else {
 			this.quantity = this.max_quantity;
 		}
@@ -590,6 +697,7 @@ function wallet(config) {
 		}
 
 		this.quantity -= qty;
+		this.quantity = parseFloat(this.quantity.toFixed(3))
 		return true;
 
 	}
@@ -598,3 +706,11 @@ function wallet(config) {
 
 }
 ////////////
+
+
+////////
+// Level
+
+function level(level) {
+	return level;
+}

@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="_margin-bottom-1">
 
 		<div v-if="object.component" :is="object.component" :object="object" :type="type" :debug="debug"></div>
 		<i-card v-else>

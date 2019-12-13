@@ -5,13 +5,15 @@
 
 		<hr />
 
+		{{ object.config.self_produce}}
+
 		<i-table>
 			<table class="_width-100">
 				<thead>
 					<tr>
 						<th width="5%">#</th>
-						<th width="20%">Prod</th>
-						<th width="50%">Progress</th>
+						<th width="30%">Prod</th>
+						<th width="40%">Progress</th>
 						<th width="25%"></th>
 					</tr>
 				</thead>

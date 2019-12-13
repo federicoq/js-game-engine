@@ -25,45 +25,55 @@
 
 			<hr />
 
-			<i-container v-if="world.animals">
+
+			<i-container>
 				<i-row>
-					<i-column xs="12">
-						<h4>Animals</h4>
-						<base-object type="animals" :object="object" v-for="object in world.animals" :key="object.id"></base-object>
+
+					<i-column xs="6">
+						
+						<i-container v-if="world.humans">
+							<i-row>
+								<i-column xs="12">
+									<h4>Humans</h4>
+									<base-object type="humans" :object="object" v-for="object in world.humans" :key="object.id"></base-object>
+								</i-column>
+							</i-row>
+						</i-container>
+
+						<i-container v-if="world.machines">
+							<i-row>
+								<i-column xs="12">
+									<h4>Machines</h4>
+									<base-object type="machines" :object="object" v-for="object in world.machines" :key="object.id"></base-object>
+								</i-column>
+							</i-row>
+						</i-container>
+
 					</i-column>
-				</i-row>
-			</i-container>
 
-			<hr />
+					<i-column xs="6">
 
-			<i-container v-if="world.humans">
-				<i-row>
-					<i-column xs="12">
-						<h4>Humans</h4>
-						<base-object type="humans" :object="object" v-for="object in world.humans" :key="object.id"></base-object>
+						<i-container v-if="world.buildings">
+							<i-row>
+								<i-column xs="12">
+									<h4>Buildings</h4>
+									<base-object type="buildings" :object="object" v-for="object in world.buildings" :key="object.id"></base-object>
+								</i-column>
+							</i-row>
+						</i-container>
+
+						<i-container v-if="world.animals">
+							<i-row>
+								<i-column xs="12">
+									<h4>Animals</h4>
+									<base-object type="animals" :object="object" v-for="object in world.animals" :key="object.id"></base-object>
+								</i-column>
+							</i-row>
+						</i-container>
+
 					</i-column>
-				</i-row>
-			</i-container>
 
-			<hr />
-
-			<i-container v-if="world.buildings">
-				<i-row>
-					<i-column xs="12">
-						<h4>Buildings</h4>
-						<base-object type="buildings" :object="object" v-for="object in world.buildings" :key="object.id"></base-object>
-					</i-column>
-				</i-row>
-			</i-container>
-
-			<hr />
-
-			<i-container v-if="world.machines">
-				<i-row>
-					<i-column xs="12">
-						<h4>Machines</h4>
-						<base-object type="machines" :object="object" v-for="object in world.machines" :key="object.id"></base-object>
-					</i-column>
+					
 				</i-row>
 			</i-container>
 

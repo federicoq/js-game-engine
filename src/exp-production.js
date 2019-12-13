@@ -24,6 +24,7 @@ function logic_production(object, info) {
 	object.config.queue_size = 1;
 	object.config.production_slots_max = 3;
 	object.config.production_slots_price = { gold: 1 };
+	object.config.self_produce = false;
 
 	if(info.config != undefined) {
 		for(var u in info.config)
@@ -133,13 +134,27 @@ function logic_production(object, info) {
 						toRemove.push(single.productionId);
 						
 						var productionInfos = _.find(object.specs.productions, { id: single.id });
-						if(productionInfos) productionInfos = _.cloneDeep(productionInfos);
 
-						// Job Completition Powerups:
-						object.powerup_recipe(productionInfos, 'profit', { keys: [ 'wallet_out', 'warehouse_out' ] }, world);
+						if(!productionInfos)
+							productionInfos = _.find(object.history.productions.productions, { id: single.id });
 
-						world.wallets_add(productionInfos.wallet_out);
-						world.warehouses_add(productionInfos.warehouse_out);
+						if(productionInfos) {
+							
+							productionInfos = _.cloneDeep(productionInfos);
+
+							// Job Completition Powerups:
+							object.powerup_recipe(productionInfos, 'profit', { keys: [ 'wallet_out', 'warehouse_out' ] }, world);
+
+							world.wallets_add(productionInfos.wallet_out);
+							world.warehouses_add(productionInfos.warehouse_out);
+
+						} else {
+
+							console.error('Production not found.');
+							console.error('It will be removed from the queue.. for convenience.');
+
+						}
+
 
 					} else {
 						single.collected = false;
@@ -185,6 +200,13 @@ function logic_production(object, info) {
 
 			}
 
+		}
+
+		// If the item is a self productor.. it's a good thing :)
+		if(this.config.self_produce != false && this.production.queue.length < this.config.queue_size) {
+			//console.log('Uhm?');
+			if(this.can_produce(this.config.self_produce, world))
+				world.trig('production-start', this, { id: this.config.self_produce });
 		}
 
 	}.bind(object));
@@ -303,7 +325,19 @@ function logic_production(object, info) {
 
 		return false;
 
-	}.bind(object)
+	}.bind(object);
+
+	// Add the before level upgrade watcher
+	// in order to complete the productions or log the previous available stocks
+	object.before_level.push(function(world) {
+
+		this.history.productions = {
+			productions: _.cloneDeep(this.specs.productions, true)
+		};
+		//console.log(this.specs.productions);
+		//console.log('Lol');
+
+	}.bind(object));
 
 	return object;
 
