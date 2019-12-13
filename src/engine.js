@@ -13,11 +13,11 @@
 /**
  * Helper to create an empty base entity.
  * 
- * @param  {object} self      [Object to transform in a base entity]
- * @param  {string} starting  [Typology identifier]
- * @param  {object} wireframe [Base object wireframe]
- * @param  {oject}  config    [base config]
- * @return {object}
+ * @param	{object}	self		[Object to transform in a base entity]
+ * @param	{string}	starting	[Typology identifier]
+ * @param	{object}	wireframe	[Base object wireframe]
+ * @param	{oject}		config		[Base config]
+ * @return	{object}
  */
 function blank_entity(self, starting, wireframe, config) {
 
@@ -69,11 +69,26 @@ function blank_entity(self, starting, wireframe, config) {
  */
 function Game() {
 
+	////////////////////////////
 	// Base Objects Manipolation
-	// -------------------------
+	// 
+	//
+
+	/**
+	 * Check if a base TYPE exists.
+	 * @param	{string}
+	 * @return	{bool}
+	 */
 	this.base_exists = function(type) {
 		return this[type] != undefined;
 	}
+
+	/**
+	 * Insert object in the relative base_type.
+	 * @param	{string}	type
+	 * @param	{object}	object
+	 * @return	{bool}
+	 */
 	this.base_add = function(type, object) {
 
 		if(!this.base_exists(type)) {
@@ -82,7 +97,16 @@ function Game() {
 		}
 
 		this[type].push(object);
+
+		return true;
 	}
+
+	/**
+	 * Remove an object from the relative base_type.
+	 * @param	{string}	type
+	 * @param	{string}	id
+	 * @return	{bool}
+	 */
 	this.base_remove = function(type, id) {
 
 		if(!this.base_exists(type)) {
@@ -104,6 +128,13 @@ function Game() {
 		this[type].splice(key, 1);
 
 	}
+
+	/**
+	 * Get a base Object
+	 * @param	{string}	type
+	 * @param	{string}	id
+	 * @return	{object}
+	 */
 	this.base_get = function(type, id) {
 		if(!this.base_exists(type)) {
 			console.error('There isn\'t a valid container named ' + type);
@@ -111,6 +142,13 @@ function Game() {
 		}
 		return _.find(this[type], { id });
 	}
+
+	/**
+	 * Gets all the object of a specific type
+	 * @param	{string}	type	[type of base]
+	 * @param	{bool}		only_id	[if true, returns only strings]
+	 * @return	{array}         	[collection of objects, or strings]
+	 */
 	this.base_gets = function(type, only_id) {
 
 		if(!this.base_exists(type)) {
@@ -122,7 +160,18 @@ function Game() {
 		else return _.map(this[type], 'id');
 	}
 
+	/////////
 	// Events
+	// 
+	// 
+
+	/**
+	 * Trig an event, on a specific object.
+	 * @param	{string}	name
+	 * @param	{object}	object
+	 * @param	{object}	args
+	 * @return	{bool}
+	 */
 	this.trig = function(name, object, args) {
 
 		// Check if there's some registered events for the trig name..
@@ -132,27 +181,72 @@ function Game() {
 			_.each(handlers, function(i) {
 				i.handler(this, args);
 			}.bind(this));
+		} else {
+			return false;
 		}
+
+		return true;
 
 	};
 
-	// ***
-	// Resources
-	// ---------
-	// > Wallets
+	//////////
+	// Wallets
+	// 
+	// 
+
 	this.wallets = [];
-	this.wallet = function(id) { return _.find(this.wallets, { id }); }
-	this.wallet_add = function(wallet) { this.wallets.push(wallet); }
+
+	/**
+	 * Get single wallet
+	 * @param	{string}	id
+	 * @return	{object}
+	 */
+	this.wallet = function(id) { 
+		return _.find(this.wallets, { id }); 
+	}
+
+	/**
+	 * Add new wallet
+	 * @param	{string}	wallet
+	 * @return	{bool}
+	 */
+	this.wallet_add = function(wallet) { 
+		this.wallets.push(wallet); 
+	}
+
+	/**
+	 * Remove a Wallet
+	 * @param	{string}	id
+	 * @return	{bool}
+	 */
 	this.wallet_remove = function(id) { 
 		var key = _.findKey(this.wallets, { id });
-		if(key)
-			this.wallets.splice(key, 1);
+		if(key) {
+			if(this.wallets.splice(key, 1))
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Get all the wallets
+	 * @return	{array}
+	 */
+	this.the_wallets = function() { 
 		return this.wallets;
 	}
-	this.the_wallets = function() { return this.wallets; }
+
+	/**
+	 * Check the availability of the wallets.
+	 * @param	{array}	recipe
+	 * @return	{bool}
+	 */
 	this.wallets_recipe = function(recipe) {
+		
 		if(!recipe) return true;
+		
 		var canAfford = true;
+		
 		_.each(recipe, function(single) {
 
 			if(!this.wallet(single.id).has(single.quantity))
@@ -163,6 +257,12 @@ function Game() {
 		return canAfford;
 
 	}
+
+	/**
+	 * Pay a Wallet Recipe.
+	 * @param	{array}	recipe
+	 * @return	{bool}
+	 */
 	this.wallets_pay = function(recipe) {
 		if(!recipe) return true;
 		if(this.wallets_recipe(recipe)) {
@@ -176,6 +276,12 @@ function Game() {
 		} return false;
 
 	}
+
+	/**
+	 * Increment Wallets by Recipe.
+	 * @param	{array}	recipe
+	 * @return	{bool}
+	 */
 	this.wallets_add = function(recipe) {
 		_.each(recipe, function(single) {
 
@@ -185,14 +291,32 @@ function Game() {
 		return true;
 	}
 
-	// this.powerups = [];
-
-	// ***
+	///////////////////
 	// System Warehouse
-	// ----------------
+	// 
+	// 
+
+	/**
+	 * Warehouse container.
+	 * @type {Array}
+	 */
 	this.warehouse = [];
+
+	/**
+	 * List of Items storable in Warehouse
+	 * @type {Array}
+	 */
 	this.warehouse_inventory = [];
+
+	/**
+	 * Add an item (1+) to the warehouse
+	 * @param	{string}	object_id
+	 * @param	{int}		quantity
+	 * @return	{bool}
+	 */
 	this.warehouse_add = function(object_id, quantity) {
+
+		if(quantity < 0) return false; // Cant add a negative quantity... i mean.. it's bad :D
 
 		// Does the Object exists?
 		var base_object = _.find(this.warehouse_inventory, { id: object_id });
@@ -210,7 +334,16 @@ function Game() {
 			this.warehouse.push({ id: object_id, quantity: quantity });
 		}
 
+		return true;
+
 	}
+
+	/**
+	 * Consume 1+ Item.
+	 * @param	{string}	object_id
+	 * @param	{int}		quantity
+	 * @return	{bool}
+	 */
 	this.warehouse_use = function(object_id, quantity) {
 
 		if(quantity == false) var quantity = 1;
@@ -222,12 +355,24 @@ function Game() {
 			}
 		}
 	}
+
+	/**
+	 * Return the quantity of a given object_id
+	 * @param	{string}	object_id
+	 * @return	{int}
+	 */
 	this.warehouse_has = function(object_id) {
 		var obj = _.find(this.warehouse, { id: object_id });
 		if(obj)
 			return obj.quantity;		
 		return 0;
 	}
+
+	/**
+	 * Verify the availability of a group of warehouse items.
+	 * @param	{array}	recipe
+	 * @return	{bool}
+	 */
 	this.warehouse_recipe = function(recipe) {
 		if(!recipe) return true;
 		var canAfford = true;
@@ -241,6 +386,12 @@ function Game() {
 		return canAfford;
 
 	}
+
+	/**
+	 * Pay a Warehouse Recipe
+	 * @param	{array}	recipe
+	 * @return	{bool}
+	 */
 	this.warehouse_pay = function(recipe) {		
 		if(!recipe) return true;
 		if(this.warehouse_recipe(recipe)) {
@@ -254,6 +405,12 @@ function Game() {
 		} return false;
 
 	}
+
+	/**
+	 * Increment the warehouse by a recipe.
+	 * @param	{array}	recipe
+	 * @return	{bool}
+	 */
 	this.warehouses_add = function(recipe) {
 		_.each(recipe, function(single) {
 			this.warehouse_add(single.id, single.quantity);
@@ -261,15 +418,24 @@ function Game() {
 		return true;
 	}
 
-	// ***
+	//////////////
 	// Level Infos
-	// -----------
+	// 
+	// 
+
 	this.level = [];
 
-	// ***
+	////////////////////////////
 	// Base Objects Interactions
-	// -------------------------
+	// 
+	// 
 
+	/**
+	 * [assign description]
+	 * @param	{object}	entity
+	 * @param	{object}	container
+	 * @return	{bool}
+	 */
 	this.assign = function(entity, container) {
 
 		var ent = _.find(this[entity[0]], { id: entity[1] });
@@ -336,29 +502,34 @@ function Game() {
 
 	}
 
-	// ***
+	//////////////////
 	// Game Controller
-	// ---------------
+	// 
+	// 
+
+	/**
+	 * Session Controller.
+	 * @type {Object}
+	 */
 	this._s = {
 		tick: 0
 	};
 
+	/**
+	 * Internal Game Ticker.
+	 * @return	{int}	internal tick
+	 */
 	this.tick = function() {
 
 		this._s.tick++;
 		// Cycle all the objects, and trig for them the "tick" event.
 		_.each(base_objects, function(entity) {
-
 			_.each(this[entity], function(singleEntity) {
-
-				// console.log('Inside the ' + entity + ': ' + singleEntity.id);
 				this.trig('tick', singleEntity, { tick: this._s.tick });
-
 			}.bind(this));
-
 		}.bind(this));
-		
-		// console.log('Internal Tick!');
+
+		this._s.tick;
 
 	}
 
