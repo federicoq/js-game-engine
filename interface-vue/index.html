@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title></title>
+	<link href="https://cdn.jsdelivr.net/npm/@inkline/inkline/dist/inkline.css" rel="stylesheet">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+</head>
+<body>
+
+	<div id="app">
+		<div>
+
+			<i-container>
+				<i-row>
+					<i-column xs="6">
+						<wallets :wallets="world.wallets"></wallets>
+						
+					</i-column>
+					<i-column xs="6">
+						<warehouse :warehouse="world.warehouse"></warehouse>
+					</i-column>
+				</i-row>
+			</i-container>
+
+			<hr />
+
+			<i-container v-if="world.animals">
+				<i-row>
+					<i-column xs="12">
+						<h4>Animals</h4>
+						<base-object type="animals" :object="object" v-for="object in world.animals" :key="object.id"></base-object>
+					</i-column>
+				</i-row>
+			</i-container>
+
+			<hr />
+
+			<i-container v-if="world.humans">
+				<i-row>
+					<i-column xs="12">
+						<h4>Humans</h4>
+						<base-object type="humans" :object="object" v-for="object in world.humans" :key="object.id"></base-object>
+					</i-column>
+				</i-row>
+			</i-container>
+
+			<hr />
+
+			<i-container v-if="world.buildings">
+				<i-row>
+					<i-column xs="12">
+						<h4>Buildings</h4>
+						<base-object type="buildings" :object="object" v-for="object in world.buildings" :key="object.id"></base-object>
+					</i-column>
+				</i-row>
+			</i-container>
+
+			<hr />
+
+			<i-container v-if="world.machines">
+				<i-row>
+					<i-column xs="12">
+						<h4>Machines</h4>
+						<base-object type="machines" :object="object" v-for="object in world.machines" :key="object.id"></base-object>
+					</i-column>
+				</i-row>
+			</i-container>
+
+		</div>
+		<!-- <pre>{{world}}</pre> -->
+	</div>
+
+	<!-- Game Logic -->
+	<script type="text/javascript" src="//unpkg.com/lodash"></script>
+	<script type="text/javascript" src="//unpkg.com/moment"></script>
+	<script type="text/javascript" src="//unpkg.com/moment-duration-format"></script>
+
+	<script type="text/javascript" src="../src/engine.js"></script>
+
+	<!-- Extensions -->
+	<script type="text/javascript" src="../src/exp-production.js"></script>
+	<script type="text/javascript" src="../src/exp-mission.js"></script>
+	<script type="text/javascript" src="../src/building-market.js"></script>
+
+	<!-- Example of Game -->
+	<script type="text/javascript" src="../examples/blank.js"></script>
+
+	<!-- Interface -->
+	<script type="text/javascript" src="//unpkg.com/vue"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@inkline/inkline/dist/inkline.js"></script>
+	<script type="text/javascript" src="//unpkg.com/http-vue-loader"></script>
+	<script type="text/javascript" src="interface.js"></script>
+
+</body>
+</html>
