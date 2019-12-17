@@ -13,11 +13,11 @@
 
 			<i-container>
 				<i-row>
-					<i-column xs="6">
+					<i-column md="6">
 						<wallets :wallets="world.wallets"></wallets>
 						
 					</i-column>
-					<i-column xs="6">
+					<i-column md="6">
 						<warehouse :warehouse="world.warehouse"></warehouse>
 					</i-column>
 				</i-row>
@@ -29,11 +29,11 @@
 			<i-container>
 				<i-row>
 
-					<i-column xs="6">
+					<i-column md="6">
 						
 						<i-container v-if="world.humans">
 							<i-row>
-								<i-column xs="12">
+								<i-column md="12">
 									<h4>Humans</h4>
 									<base-object type="humans" :object="object" v-for="object in world.humans" :key="object.id"></base-object>
 								</i-column>
@@ -42,7 +42,7 @@
 
 						<i-container v-if="world.machines">
 							<i-row>
-								<i-column xs="12">
+								<i-column md="12">
 									<h4>Machines</h4>
 									<base-object type="machines" :object="object" v-for="object in world.machines" :key="object.id"></base-object>
 								</i-column>
@@ -51,11 +51,11 @@
 
 					</i-column>
 
-					<i-column xs="6">
+					<i-column md="6">
 
 						<i-container v-if="world.buildings">
 							<i-row>
-								<i-column xs="12">
+								<i-column md="12">
 									<h4>Buildings</h4>
 									<base-object type="buildings" :object="object" v-for="object in world.buildings" :key="object.id"></base-object>
 								</i-column>
@@ -64,7 +64,7 @@
 
 						<i-container v-if="world.animals">
 							<i-row>
-								<i-column xs="12">
+								<i-column md="12">
 									<h4>Animals</h4>
 									<base-object type="animals" :object="object" v-for="object in world.animals" :key="object.id"></base-object>
 								</i-column>
@@ -81,10 +81,47 @@
 		<!-- <pre>{{world}}</pre> -->
 	</div>
 
+	<script type="text/javascript">
+		Function.prototype.toJSON = function() {
+		    var parts = this
+		        .toString()
+		        .match(/^\s*function[^(]*\(([^)]*)\)\s*{(.*)}\s*$/)
+		    ;
+
+		    return {
+		    	__super_type: 'eval',
+		    	content: this.toString()
+		    };
+
+		    console.log(this.toString());
+		    if (parts == null)
+		        throw 'Function form not supported';
+
+		    return [
+		        'window.Function',
+		        parts[1].trim().split(/\s*,\s*/),
+		        parts[2]
+		    ];
+		};
+		Function.deserialise = function(key, data) {
+			if(data.__super_type != undefined) {
+				var handler = eval(data.content);
+				console.log(data.content);
+				return handler;
+			}
+		    return (data instanceof Array && data[0] == 'window.Function') ?
+		        new (Function.bind.apply(Function, [Function].concat(data[1], [data[2]]))) :
+		        data
+		    ;
+		};
+	</script>
+
 	<!-- Game Logic -->
 	<script type="text/javascript" src="//unpkg.com/lodash"></script>
 	<script type="text/javascript" src="//unpkg.com/moment"></script>
 	<script type="text/javascript" src="//unpkg.com/moment-duration-format"></script>
+
+	<script type="text/javascript" src="../src/storage-logic.js" type="module"></script>
 
 	<script type="text/javascript" src="../src/engine.js"></script>
 

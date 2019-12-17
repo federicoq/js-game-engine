@@ -121,6 +121,13 @@ function logic_production(object, info) {
 
 				if(single.completed == false) console.log('Production: ' + single.productionId + ' progress. ('+single.progress+')');
 
+				if(single.completed == true && single.tickWaste != 0 && single.wasted == false) {
+					if(single.tickProgress >= single.tickWaste) {
+						single.wasted = true;
+						console.log('Production wasted due tick overdued.');
+					}
+				}
+
 				if(single.tickRemain == 0) {
 
 					if(single.completed == false)
@@ -130,31 +137,39 @@ function logic_production(object, info) {
 
 					if(single.autoCollect == true || (single.collected != undefined && single.collected == true)) {
 
-						console.log('Collected the production.');
-						toRemove.push(single.productionId);
-						
-						var productionInfos = _.find(object.specs.productions, { id: single.id });
+						if(single.wasted == true) {
 
-						if(!productionInfos)
-							productionInfos = _.find(object.history.productions.productions, { id: single.id });
-
-						if(productionInfos) {
-							
-							productionInfos = _.cloneDeep(productionInfos);
-
-							// Job Completition Powerups:
-							object.powerup_recipe(productionInfos, 'profit', { keys: [ 'wallet_out', 'warehouse_out' ] }, world);
-
-							world.wallets_add(productionInfos.wallet_out);
-							world.warehouses_add(productionInfos.warehouse_out);
+							console.log('Production wasted.');
 
 						} else {
 
-							console.error('Production not found.');
-							console.error('It will be removed from the queue.. for convenience.');
+							console.log('Collected the production.');
+							
+							var productionInfos = _.find(object.specs.productions, { id: single.id });
+
+							if(!productionInfos)
+								productionInfos = _.find(object.history.productions.productions, { id: single.id });
+
+							if(productionInfos) {
+								
+								productionInfos = _.cloneDeep(productionInfos);
+
+								// Job Completition Powerups:
+								object.powerup_recipe(productionInfos, 'profit', { keys: [ 'wallet_out', 'warehouse_out' ] }, world);
+
+								world.wallets_add(productionInfos.wallet_out);
+								world.warehouses_add(productionInfos.warehouse_out);
+
+							} else {
+
+								console.error('Production not found.');
+								console.error('It will be removed from the queue.. for convenience.');
+
+							}
 
 						}
 
+						toRemove.push(single.productionId);
 
 					} else {
 						single.collected = false;
@@ -268,14 +283,21 @@ function logic_production(object, info) {
 		
 			// Create the JOB Payload:
 			var creationismPayload = {
+
 				productionId: _.uniqueId('production-log-'),
+				
 				id: args.id,
 				tickProduction: production_payload.ticks,
 				progress: 0,
 				tickProgress: 0,
+
 				tickRemain: production_payload.ticks,
+				tickWaste: production_payload.tickWaste ? (production_payload.ticks + production_payload.tickWaste) : 0,
 				completed: false,
+				wasted: false,
+
 				autoCollect: production_payload.autoCollect
+
 			}
 
 			// Queue/Active Production switcher.

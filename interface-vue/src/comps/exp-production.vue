@@ -29,7 +29,7 @@
 							</i-progress>
 						</td>
 						<td v-if="!slot.empty" class="_text-center">
-							<a :class="{ '_text-muted': slot.completed == false, '_text-success': slot.completed == true }" @click.prevent="collect_single(slot.productionId)" href="javascript:;">Collect <small v-if="slot.completed != true">({{slot.tickRemain|duration}})</small></a>
+							<a :class="{ '_text-muted': slot.completed == false, '_text-success': slot.completed == true }" @click.prevent="collect_single(slot.productionId)" href="javascript:;">{{ slot.wasted == false ? 'Collect' : 'Collect Waste' }} <small v-if="slot.completed != true">({{slot.tickRemain|duration}})</small></a>
 						</td>
 
 

@@ -5,8 +5,16 @@
 		<i-card v-else>
 
 		    <h4 class="title">
+
 		    	{{object.name}}
-		    	<i-badge>{{ object.id }}</i-badge>
+
+		    	<i-popover v-if="object.help" trigger="hover">
+		    	    <i-badge variant="secondary" size="sm">Help</i-badge>
+		    	    <template slot="body">{{ object.help }}</template>
+		    	</i-popover>
+		    	
+		    	<!--<i-badge>{{ object.id }}</i-badge>-->
+
 		    </h4>
 		    <p class="subtitle">{{ object.type }} {{ type }}</p>
 
@@ -25,8 +33,6 @@
 		    </div>
 
 		</i-card>
-
-
 
 	</div>
 </template>

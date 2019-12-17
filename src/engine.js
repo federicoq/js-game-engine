@@ -71,9 +71,10 @@ function blank_entity(self, starting, wireframe, config) {
  *
  * This is the controller and container of all the game logic.
  */
-function Game(base_objects) {
+function Game(config) {
 
-	this.base_objects = base_objects;
+	this.___config = config;
+	this.base_objects = config.base_objects;
 
 	//////////////////////
 	// Game Status Manager
@@ -310,15 +311,15 @@ function Game(base_objects) {
 
 	/**
 	 * Warehouse container.
-	 * @type {Array}
+	 * @type {array}
 	 */
 	this.warehouse = [];
 
 	/**
 	 * List of Items storable in Warehouse
-	 * @type {Array}
+	 * @type {array}
 	 */
-	this.warehouse_inventory = [];
+	this.warehouse_inventory = config.warehouse_inventory ? config.warehouse_inventory : [];
 
 	/**
 	 * Add an item (1+) to the warehouse
@@ -435,14 +436,39 @@ function Game(base_objects) {
 	// 
 	// 
 
+	/**
+	 * Levels Container
+	 * @type 	{array}
+	 */
 	this.levels = [];
-	this.level = false;
-	this.level_watcher = false;
 
+	/**
+	 * Current Level
+	 * @type 	{object}
+	 */
+	this.level = false;
+
+	/**
+	 * Wallet Watcher for level progression
+	 * @type	{string}
+	 */
+	this.level_watcher = config.level_watcher ? config.level_watcher : false;
+
+	/**
+	 * Add a new level to the available
+	 * @param 	{object} 	level
+	 * @return	{array}
+	 */
 	this.level_add = function(level) {
 		this.levels.push(level);
+		return this.levels;
 	}
 
+	/**
+	 * Start a level
+	 * @param	{object}	level 	Level Object.
+	 * @return	{bool} 	
+	 */
 	this.level_start = function(level) {
 
 		// First.. we need to check if we can actually activate this level ^_^
@@ -495,6 +521,11 @@ function Game(base_objects) {
 
 	}
 
+	/**
+	 * Watch the current level infos.
+	 * @param 	{int} 	tick
+	 * @return 	{bool}
+	 */
 	this.level_tick = function(tick) {
 
 		var qty = this.wallet(this.level_watcher).quantity;
@@ -629,7 +660,7 @@ function Game(base_objects) {
 		this.level_tick(this._s.tick);
 
 		// Cycle all the objects, and trig for them the "tick" event.
-		_.each(base_objects, function(entity) {
+		_.each(this.base_objects, function(entity) {
 			_.each(this[entity], function(singleEntity) {
 				this.trig('tick', singleEntity, { tick: this._s.tick });
 			}.bind(this));
@@ -645,7 +676,7 @@ function Game(base_objects) {
 	this.collect_all = function() {
 
 		// Cycle all the objects, and trig for them the "tick" event.
-		_.each(base_objects, function(entity) {
+		_.each(this.base_objects, function(entity) {
 
 			_.each(this[entity], function(singleEntity) {
 				this.trig('production-collect-all', singleEntity);
@@ -662,6 +693,15 @@ function Game(base_objects) {
 ////////////
 // Wallet //
 function wallet(config) {
+
+	if(config == undefined) {
+		var config = {
+			id: false,
+			quantity: false,
+			max_quantity: false,
+			float: false
+		}
+	}
 
 	this.id = config.id ? config.id : _.uniqueId('wallet-');
 	this.quantity = config.quantity ? config.quantity : 0;
