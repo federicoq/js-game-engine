@@ -5,8 +5,6 @@
 
 		<hr />
 
-		{{ object.config.self_produce}}
-
 		<i-table>
 			<table class="_width-100">
 				<thead>
@@ -111,6 +109,8 @@
 
 			</i-list-group-item>
 		</i-list-group>
+
+		<pre>{{ object.production.powerups }}</pre>
 		
 	</div>
 </template>

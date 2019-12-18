@@ -192,7 +192,10 @@ function Game(config) {
 
 		if(handlers.length > 0) {
 			_.each(handlers, function(i) {
-				i.handler(this, args);
+				if(i.handler)
+					i.handler(this, args);
+				else
+					console.log('Wof');
 			}.bind(this));
 		} else {
 			return false;
@@ -473,7 +476,6 @@ function Game(config) {
 
 		// First.. we need to check if we can actually activate this level ^_^
 		var qty = this.wallet(this.level_watcher).quantity;
-
 		if(qty >= level.range[0] && qty < level.range[1]) {
 
 			if(this.level != false) {

@@ -19,6 +19,7 @@ function logic_production(object, info) {
 		object.specs.productions = [];
 
 	object.specs._logic_production = true;
+	object.powerups = [];
 
 	object.config.production_slots = 1;
 	object.config.queue_size = 1;
@@ -49,9 +50,23 @@ function logic_production(object, info) {
 
 	}
 
-	// Add Powerup:
+	object.trigger_add('save-export', function(world, args) {
+		args.item.extensions.production = _.cloneDeep(this.production);
+	}.bind(object));
+
+	object.trigger_add('save-load', function(world, args) {
+		args.item.production.active = _.cloneDeep(args.data.extensions.production.active, true);
+		args.item.production.queue = _.cloneDeep(args.data.extensions.production.queue, true);
+		args.item.production.powerups = _.cloneDeep(args.data.extensions.production.powerups, true);
+		return this;
+	}.bind(object));
+
+	// Add Powerup
 	object.trigger_add('production-powerup', function(world, args) {
-		this.production.powerups.push(args);
+		if(_.find(this.powerups, { id: args })) {
+			if(this.production.powerups.indexOf(args) == -1)
+				this.production.powerups.push(args);
+		}
 	}.bind(object));
 
 	// Collect All
@@ -68,9 +83,20 @@ function logic_production(object, info) {
 		}
 	}.bind(object));
 
+	object.powerups_list = function() {
+
+		var pups = [];
+		_.each(this.production.powerups, function(single) {
+			pups.push(_.find(this.powerups, { id: single }));
+		}.bind(this));
+
+		return pups;
+
+	}.bind(object);
+
 	object.powerup_config = function(config, world) {
 
-		var config_powerups = _.filter(this.production.powerups, { type: 'config' });
+		var config_powerups = _.filter(this.powerups_list(), { type: 'config' });
 		if(config_powerups) {
 
 			_.each(config_powerups, function(singlePowerup) {
@@ -83,14 +109,20 @@ function logic_production(object, info) {
 
 	object.powerup_recipe = function(productionInfos, type, config, world) {
 
-		var powerups = _.filter(this.production.powerups, { type });
+		var powerups = _.filter(this.powerups_list(), { type });
 
 		if(powerups) {
 			_.each(powerups, function(singlePowerup) {
 
 				var k = typeof singlePowerup.value;
 
-				if(k == 'function') {} else {
+				if(k == 'function') {
+					_.each(config.keys, function(k) {
+						_.each(productionInfos[k], function(a) {
+							a.quantity = singlePowerup.value(parseFloat(a.quantity));
+						});
+					}.bind(this));
+				} else {
 					_.each(config.keys, function(k) {
 						_.each(productionInfos[k], function(a) {
 							a.quantity = parseFloat(a.quantity) * parseFloat(singlePowerup.value);
@@ -144,11 +176,13 @@ function logic_production(object, info) {
 						} else {
 
 							console.log('Collected the production.');
-							
+
 							var productionInfos = _.find(object.specs.productions, { id: single.id });
 
-							if(!productionInfos)
-								productionInfos = _.find(object.history.productions.productions, { id: single.id });
+							if(!productionInfos) {
+								if(object.history.productions)
+									productionInfos = _.find(object.history.productions.productions, { id: single.id });
+							}
 
 							if(productionInfos) {
 								
@@ -241,7 +275,7 @@ function logic_production(object, info) {
 			// ------------------------
 
 			// Tick Area: Required tick to accomplish a production task.
-			var tick_powerups = _.filter(this.production.powerups, { type: 'tick' });
+			var tick_powerups = _.filter(this.powerups_list(), { type: 'tick' });
 			if(tick_powerups) {
 				_.each(tick_powerups, function(singlePowerup) {
 					var tof = typeof singlePowerup.value;

@@ -55,7 +55,8 @@ var PRODUCTIONS = {
 			warehouse_out: [ { id: 'point', quantity: 1 } ],
 			wallet_out: [ { id: 'exp', quantity: 1 } ],
 			ticks: 20,
-			autoCollect: false
+			autoCollect: true,
+			tickWaste: 50
 		},
 		point10: {
 			id: 'point-10-pack-create',
@@ -64,7 +65,8 @@ var PRODUCTIONS = {
 			warehouse_out: [ { id: 'point', quantity: 10 } ],
 			wallet_out: [ { id: 'exp', quantity: 5 } ],
 			ticks: 20,
-			autoCollect: false
+			autoCollect: false,
+			tickWaste: 50
 		},
 		point100: {
 			id: 'point-100-pack-create',
@@ -226,7 +228,13 @@ function point_transformer() {
 		}.bind(base),
 		level_1: function() {
 			base.specs.productions.push(PRODUCTIONS.buildings.quad);
-		}
+		},
+		level_5: function() {
+
+			base.config.production_slots = 3;
+			base.config.queue_size = 3;
+
+		}.bind(base)
 	};
 
 	_.each(base, function(value, key) { this[key] = value; }.bind(this));
@@ -287,6 +295,16 @@ function three() {
 		}]
 	});
 
+	base.innerTick = 0;
+	base.trigger_add('tick', function(world) {
+		this.innerTick++;
+		if(this.innerTick % 10 == 0) {
+			if(world.wallet('pollution').quantity == 0) {
+				world.wallet(world.level_watcher).add(1);
+			}
+		}
+	}.bind(base));
+
 	_.each(base, function(value, key) { this[key] = value; }.bind(this));
 
 	return this;
@@ -310,7 +328,6 @@ function umano() {
 
 			base.config.production_slots = 1;
 			base.config.queue_size = 3;
-
 			base.specs.productions.push(PRODUCTIONS.humans.pointDemo);
 
 		}.bind(base),
@@ -322,16 +339,27 @@ function umano() {
 		}
 	};
 
-	//logic_mission(base, {});
+	base.powerups.push(
+		{ id: 'production-double', type: 'profit', value: function(a) { return a*5; } }
+	);
+
+	base.config.self_produce = PRODUCTIONS.humans.point.id;
+
+	base.trigger_add('save-load', function(world, args) {
+		world.trig('production-powerup', this, 'production-double');
+	}.bind(base));
 
 	_.each(base, function(value, key) { this[key] = value; }.bind(this));
+
+	return this;
+
+	//logic_mission(base, {});
 
 	/*this.buildings_validate = function(building) {
 		if(building.type == 'land') return true;
 		return false;
 	};*/
 
-	return this;
 
 	/*
 	// Pushing a Production Powerup to the Entity
@@ -353,12 +381,128 @@ var game_config = {
 	warehouse_inventory: inventory_archive
 };
 
+
+var level_0 = new level({
+	id: 'level_0',
+	name: 'Tutorial',
+	description: 'Tutorial',
+	range: [ 0, 100 ],
+	activate: function(world) {
+
+		// 1) Un umano
+		var human = new umano();
+
+		// 2) Un Point Transformer
+		var PointTransformer = new point_transformer();
+
+		world.human_add(human);
+		world.building_add(PointTransformer);
+
+	},
+	deactivate: function(world) {},
+	tick: function(tick, world) {}
+});
+
+var level_1 = new level({
+	id: 'level_1',
+	name: 'Tutorial',
+	description: 'Tutorial',
+	range: [ 100, 200 ],
+	activate: function(world) {
+
+		// 1) Un Solid Maker
+		var SolidMaker = new solid_maker();
+		world.building_add(SolidMaker);
+
+		// 2) Un albero, per abbattere l'inquinamento.
+		for(var a = 0; a < 1; a++)
+			world.machine_add(new three());
+
+	},
+	deactivate: function(world) {
+		world.wallet('money').add(1000000);
+	},
+	tick: function(tick, world) {}
+});
+
+var level_2 = new level({
+	id: 'level_2',
+	name: 'Tutorial',
+	description: 'Tutorial',
+	range: [ 200, 300 ],
+	activate: function(world) {
+
+		world.humans[0].config.self_produce = 'point-create';
+		world.humans[0].specs.productions[0].autoCollect = true;
+
+	},
+	deactivate: function(world) {},
+	tick: function(tick, world) {}
+});
+
+var level_3 = new level({
+	id: 'level_3',
+	name: 'Tutorial',
+	description: 'Tutorial',
+	range: [ 300, 400 ],
+	activate: function(world) {
+
+		game.trig('production-powerup', world.humans[0], { id: 'production-slots', type: 'config', value: function(config, world) {
+			config.production_slots *= 5;
+			return config;
+		} });
+
+		game.trig('production-powerup', world.humans[0], { id: 'production-double', type: 'tick', value: function(a) { return a/2; } });
+
+
+	},
+	deactivate: function(world) {},
+	tick: function(tick, world) {}
+});
+
+var level_4 = new level({
+	id: 'level_4',
+	name: 'Level 4',
+	description: 'Woah',
+	range: [ 1000, 1200 ],
+	activate: function(world) {
+
+		game.wallet('money').max_quantity = 100000;
+		game.wallet('exp').max_quantity = 10000;
+
+		game.wallet('money').add(500000);
+
+	},
+	deactivate: function(world) {},
+	tick: function(tick, world) {}
+});
+
+var level_5 = new level({
+	id: 'level_5',
+	name: 'Level 5',
+	description: 'Woah',
+	range: [ 1500, 2000 ],
+	activate: function(world) {
+
+		var market = new market();
+		game.building_add(market);
+
+	},
+	deactivate: function(world) {},
+	tick: function(tick, world) {}
+});
+
+
+
 var save_manager = new SaveManager({
 	game_token: 'blank-game',
+	version: 1,
+	//from_
 	init: function() {
 
-		game = new Game(game_config);//['humans', 'buildings', 'machines']);
+		game = new Game(game_config);
 		extendGame(game);
+
 		// Wallets:
 		var money = new wallet({ id: 'money', max_quantity: 1000, quantity: 100, float: true });
 		var exp = new wallet({ id: 'exp', max_quantity: 1000, quantity: 0, float: true });
@@ -370,109 +514,14 @@ var save_manager = new SaveManager({
 		game.wallet_add(gold);
 		game.wallet_add(pollution);
 
-		var level_0 = new level({
-			id: 'level_0',
-			name: 'Tutorial',
-			description: 'Tutorial',
-			range: [ 0, 100 ],
-			activate: function(world) {
-
-				// 1) Un umano
-				var human = new umano();
-
-				// 2) Un Point Transformer
-				var PointTransformer = new point_transformer();
-
-				world.human_add(human);
-				world.building_add(PointTransformer);
-
-			},
-			deactivate: function(world) {},
-			tick: function(tick, world) {}
-		});
-
-		var level_1 = new level({
-			id: 'level_1',
-			name: 'Tutorial',
-			description: 'Tutorial',
-			range: [ 100, 200 ],
-			activate: function(world) {
-
-				// 1) Un Solid Maker
-				var SolidMaker = new solid_maker();
-				world.building_add(SolidMaker);
-
-				// 2) Un albero, per abbattere l'inquinamento.
-				for(var a = 0; a < 1; a++)
-					world.machine_add(new three());
-
-			},
-			deactivate: function(world) {
-				world.wallet('money').add(1000000);
-			},
-			tick: function(tick, world) {}
-		});
-
-		var level_2 = new level({
-			id: 'level_2',
-			name: 'Tutorial',
-			description: 'Tutorial',
-			range: [ 200, 300 ],
-			activate: function(world) {
-
-				world.humans[0].config.self_produce = 'point-create';
-				world.humans[0].specs.productions[0].autoCollect = true;
-
-			},
-			deactivate: function(world) {},
-			tick: function(tick, world) {}
-		});
-
-		var level_3 = new level({
-			id: 'level_3',
-			name: 'Tutorial',
-			description: 'Tutorial',
-			range: [ 300, 400 ],
-			activate: function(world) {
-
-				game.trig('production-powerup', world.humans[0], { id: 'production-slots', type: 'config', value: function(config, world) {
-					config.production_slots *= 5;
-					return config;
-				} });
-
-				game.trig('production-powerup', world.humans[0], { id: 'production-double', type: 'tick', value: function(a) { return a/2; } });
-
-
-			},
-			deactivate: function(world) {},
-			tick: function(tick, world) {}
-		});
-
-
 		game.level_add(level_0);
 		game.level_add(level_1);
 		game.level_add(level_2);
 		game.level_add(level_3);
-
-		/*
-		// Props:
-		var h = new umano();
-		var b = new baseBuilding();
-		var m = new baseMachine();
-		var PointTransformer = new point_transformer();
-		var SolidMaker = new solid_maker();
-
-		var market = new market();
-
-		game.human_add( h ); // 1
-		game.building_add( PointTransformer ); // 2
-		game.building_add( SolidMaker ); // 2
-		game.building_add( market ); // 2
-
-		*/
+		game.level_add(level_4);
+		game.level_add(level_5);
 
 		return game;
-
 
 	}
 });
@@ -486,35 +535,3 @@ function t() {
 }
 
 t();
-
-console.log(save_manager);
-
-function swap_session(game) {
-
-	console.log('SWAP');
-	console.log(game);
-
-	var game2 = serialize(game, true);
-	console.log(JSON.stringify(game2));
-
-	//var game = unserialize(game2);
-
-}
-
-function reactivate(url, game) {
-
-	console.log('Wof');
-	var game2 = unserialize(JSON.parse(url));
-
-	game = game2;
-
-}
-
-
-/*
-game.human_remove('human-1');
-console.log(game.humans);
-console.log(game.buildings);
-console.log(game.machines);
-console.log(game);
-*/

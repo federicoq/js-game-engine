@@ -37,7 +37,12 @@ var app = new Vue({
 		warehouse: httpVueLoader(base + 'comps/warehouse.vue')
 	},
 	el: '#app',
+	methods: {
+		save: function() {
+			save_manager.store_session();
+		}
+	},
 	data: {
-		world: game
+		world: save_manager.game
 	}
 });

@@ -14,6 +14,7 @@
 			<i-container>
 				<i-row>
 					<i-column md="6">
+						<i-button @click.prevent="save">Save {{world._s.tick}} {{world.level.id}}</i-button>
 						<wallets :wallets="world.wallets"></wallets>
 						
 					</i-column>
@@ -24,7 +25,6 @@
 			</i-container>
 
 			<hr />
-
 
 			<i-container>
 				<i-row>
@@ -72,7 +72,6 @@
 						</i-container>
 
 					</i-column>
-
 					
 				</i-row>
 			</i-container>
@@ -80,41 +79,6 @@
 		</div>
 		<!-- <pre>{{world}}</pre> -->
 	</div>
-
-	<script type="text/javascript">
-		Function.prototype.toJSON = function() {
-		    var parts = this
-		        .toString()
-		        .match(/^\s*function[^(]*\(([^)]*)\)\s*{(.*)}\s*$/)
-		    ;
-
-		    return {
-		    	__super_type: 'eval',
-		    	content: this.toString()
-		    };
-
-		    console.log(this.toString());
-		    if (parts == null)
-		        throw 'Function form not supported';
-
-		    return [
-		        'window.Function',
-		        parts[1].trim().split(/\s*,\s*/),
-		        parts[2]
-		    ];
-		};
-		Function.deserialise = function(key, data) {
-			if(data.__super_type != undefined) {
-				var handler = eval(data.content);
-				console.log(data.content);
-				return handler;
-			}
-		    return (data instanceof Array && data[0] == 'window.Function') ?
-		        new (Function.bind.apply(Function, [Function].concat(data[1], [data[2]]))) :
-		        data
-		    ;
-		};
-	</script>
 
 	<!-- Game Logic -->
 	<script type="text/javascript" src="//unpkg.com/lodash"></script>
