@@ -220,19 +220,19 @@ function point_transformer() {
 	base.levels = {
 		level_0: function() {
 
-			base.config.production_slots = 1;
-			base.config.queue_size = 1;
+			this.config.production_slots = 1;
+			this.config.queue_size = 1;
 
-			base.specs.productions.push(PRODUCTIONS.buildings.line);
+			this.specs.productions.push(PRODUCTIONS.buildings.line);
 
 		}.bind(base),
 		level_1: function() {
-			base.specs.productions.push(PRODUCTIONS.buildings.quad);
-		},
+			this.specs.productions.push(PRODUCTIONS.buildings.quad);
+		}.bind(base),
 		level_5: function() {
 
-			base.config.production_slots = 3;
-			base.config.queue_size = 3;
+			this.config.production_slots = 3;
+			this.config.queue_size = 3;
 
 		}.bind(base)
 	};
@@ -484,8 +484,8 @@ var level_5 = new level({
 	range: [ 1500, 2000 ],
 	activate: function(world) {
 
-		var market = new market();
-		game.building_add(market);
+		var MMkt = new market();
+		world.building_add(MMkt);
 
 	},
 	deactivate: function(world) {},
