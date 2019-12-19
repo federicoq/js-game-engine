@@ -41,6 +41,7 @@
 module.exports = {
 	components: {
 		buildingMarket: httpVueLoader(base + 'comps/building-market.vue'),
+		humanStoryteller: httpVueLoader(base + 'comps/human-storyteller.vue'),
 		expProduction: httpVueLoader(base + 'comps/exp-production.vue'),
 		expMission: httpVueLoader(base + 'comps/exp-mission.vue')
 	},

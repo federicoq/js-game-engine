@@ -53,3 +53,61 @@ il codice nasce per poter creare un giochino in stile farmville per un'adv game 
 l'idea (non ancora elaborata) è quindi quella di avere un villaggio, delle mucche, un po' di edifici e produrre roba per:
 - evadere gli ordini che servono per acquisire EXP + Money (wallets) 
 - ogni tot EXP si sbloccano nuovi edifici, ci sono reward di Money e nuove Produzioni
+
+
+---
+
+
+# Requisiti
+
+- lodash
+- momentjs
+- vuejs
+- threejs
+- gsap
+
+# Architettura
+
+Genericamente parlando si tratta di un sistema di contenimento e coordinamento di ***n*** oggetti di ***m*** tipi diversi e di uno strato destinato alla gestione del game play (wallets, warehouse, levels)
+
+Il contenitore è il **Gioco**, e i gli oggetti contenuti sono le **entità base**.  
+
+- Gioco
+	- Entità Base
+		- Edifici
+		- Persone
+		- Macchinari
+		- Animali
+		- ecc..
+	- Wallets
+		- Soldi
+		- Esperienza
+		- Risorsa A
+		- ecc
+	- Warehouse
+		- Contenitore per oggetti
+	- Livelli
+
+## Entità Base
+
+Ogni **Entità Base** è reattiva e può interagire con tutto il **gioco** mediante:
+- Eventi
+- Accesso Diretto all'oggetto
+
+> La sicurezza, intersa come inter-operabilità delle entità, non è stata tenuta in considerazione durante lo sviluppo; dunque qualunque entità in qualunque **tick** andare a modificare qualunque aspetto del gioco.
+
+Il motore di tutto il sistema è il **tick**, ed è l'unità di misura minima del tempo. È di *default* 100ms. 10 tick sono 1 secondo.
+
+Ad ogni tick, viene invocato l'evento `tick` a tutte le entità del gioco. All'evento possono essere agganciati ***n*** metodi con funzionalità diversa; questa caratteristica permette di creare delle entità con caratteristiche variegate.
+
+Tra le altre caratteristiche dell'entità, c'è la possibilità di creare una relazione di "contenitore/contenuto" tra altre entità l'implementazione di logiche di game play complesse tipo: "La **Produzione A** di **Macchinario 1** è abilitata se nel **Macchinario 1** c'è **1 Umano**" ecc.
+
+Anche in fase di "Upgrade Livello" viene invocato, in ogni entità, un metodo specifico in grado di gestire eventuali modifiche all'entità sulla base del livello.
+
+> Nel caso in cui l'avanzamento del livello della singola entità è diverso dall'intero livello di gioco, bisogna creare la propria logica di avanzamento all'interno dell'oggetto specifico, e ignorare le funzionalità di upgrade automatico del livello.
+
+Inoltre, in fase di salvataggio della sessione, viene invocato l'evento `save-export`, e in fase di caricamento `save-load`. Questi due eventi permettono alle entità di sistemare i dati personalizzati all'esterno delle proprietà di sistema (config, specs) sia in fase di salvataggio/serializzazione che in fase di ricostruzione.
+
+> Attenzione alle funzioni contenute all'interno della struttura dati; tutto ciò che viene esportato/ricaricato non dovrebbe avere logica applicativa.. bensì la logica applicativa dovrebbe essere rigenerata a partire dalle informazioni contenute nella sessione..
+
+

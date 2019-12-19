@@ -31,6 +31,20 @@
 
 					<i-column md="6">
 						
+						<i-container v-if="world.buildings">
+							<i-row>
+								<i-column md="12">
+									<h4>Buildings</h4>
+									<base-object type="buildings" :object="object" v-for="object in world.buildings" :key="object.id"></base-object>
+								</i-column>
+							</i-row>
+						</i-container>
+
+
+					</i-column>
+
+					<i-column md="6">
+
 						<i-container v-if="world.humans">
 							<i-row>
 								<i-column md="12">
@@ -40,24 +54,11 @@
 							</i-row>
 						</i-container>
 
-						<i-container v-if="world.machines">
+						<!-- <i-container v-if="world.machines">
 							<i-row>
 								<i-column md="12">
 									<h4>Machines</h4>
 									<base-object type="machines" :object="object" v-for="object in world.machines" :key="object.id"></base-object>
-								</i-column>
-							</i-row>
-						</i-container>
-
-					</i-column>
-
-					<i-column md="6">
-
-						<i-container v-if="world.buildings">
-							<i-row>
-								<i-column md="12">
-									<h4>Buildings</h4>
-									<base-object type="buildings" :object="object" v-for="object in world.buildings" :key="object.id"></base-object>
 								</i-column>
 							</i-row>
 						</i-container>
@@ -69,7 +70,7 @@
 									<base-object type="animals" :object="object" v-for="object in world.animals" :key="object.id"></base-object>
 								</i-column>
 							</i-row>
-						</i-container>
+						</i-container> -->
 
 					</i-column>
 					
@@ -86,7 +87,6 @@
 	<script type="text/javascript" src="//unpkg.com/moment-duration-format"></script>
 
 	<script type="text/javascript" src="../src/storage-logic.js" type="module"></script>
-
 	<script type="text/javascript" src="../src/engine.js"></script>
 
 	<!-- Extensions -->
@@ -95,7 +95,7 @@
 	<script type="text/javascript" src="../src/building-market.js"></script>
 
 	<!-- Example of Game -->
-	<script type="text/javascript" src="../examples/blank.js"></script>
+	<script type="text/javascript" src="../examples/farm.js"></script>
 
 	<!-- Interface -->
 	<script type="text/javascript" src="//unpkg.com/vue"></script>

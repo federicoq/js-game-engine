@@ -19,8 +19,8 @@ function logic_mission(object, info) {
 		object.specs.mission = [];
 
 	object.specs._logic_mission = true;
-
 	object.config.mission_slots = 1;
+	object.config.auto_mission = info.auto_mission || false;
 
 	if(object.mission == undefined) object.mission = {};
 
@@ -28,17 +28,32 @@ function logic_mission(object, info) {
 		active: []
 	});
 
+	/**
+	 * [powerup_recipe description]
+	 * @param  {[type]} recipe [description]
+	 * @return {[type]}        [description]
+	 */
 	object.powerup_recipe = function(recipe) {
 
 		return recipe;
 
 	}
 
+	/**
+	 * [description]
+	 * @param  {[type]} world [description]
+	 * @param  {[type]} args) {		if(_.random(0,100) [description]
+	 * @return {[type]}       [description]
+	 */
 	object.trigger_add('tick', function(world, args) {
 
-		if(_.random(0,100) == 20) {
-			var mission = this.mission_generate(world);
-			this.mission_add(mission);
+		if(this.config.auto_mission == true) {
+
+			if(_.random(0,100) == 20) {
+				var mission = this.mission_generate(world);
+				this.mission_add(mission);
+			}
+
 		}
 
 		if(this.mission.active.length > 0) {
@@ -88,6 +103,12 @@ function logic_mission(object, info) {
 
 	}.bind(object));
 
+	/**
+	 * [mission_reward description]
+	 * @param  {[type]} mission [description]
+	 * @param  {[type]} world   [description]
+	 * @return {[type]}         [description]
+	 */
 	object.mission_reward = function(mission, world) {
 
 		var reward = _.cloneDeep(mission.rewards, true);
@@ -117,10 +138,20 @@ function logic_mission(object, info) {
 
 	}
 
+	/**
+	 * [mission_collect description]
+	 * @param  {[type]} mission [description]
+	 * @return {[type]}         [description]
+	 */
 	object.mission_collect = function(mission) {
 		mission.rewarded = true;
 	}
 
+	/**
+	 * [mission_add description]
+	 * @param  {[type]} mission [description]
+	 * @return {[type]}         [description]
+	 */
 	object.mission_add = function(mission) {
 
 		if(this.mission.active.length < this.config.mission_slots) {
@@ -134,6 +165,11 @@ function logic_mission(object, info) {
 
 	}.bind(object);
 
+	/**
+	 * [mission_generate description]
+	 * @param  {[type]} world [description]
+	 * @return {[type]}       [description]
+	 */
 	object.mission_generate = function(world) {
 
 		// Object Already in warehouse:

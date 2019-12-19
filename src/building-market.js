@@ -3,7 +3,7 @@
   /  |/  /__ _____/ /_____ / /_
  / /|_/ / _ `/ __/  '_/ -_) __/
 /_/  /_/\_,_/_/ /_/\_\\__/\__/ 
-                               
+
 > Building
 	Da considerare come edificio "base" con una logica di acquisto/scambio
 	o più in generale trasformazione..
@@ -31,7 +31,13 @@ function market() {
 		commission: 3
 	};
 
-	// Buy an ITEM
+	/**
+	 * [buy description]
+	 * @param  {[type]} id    [description]
+	 * @param  {[type]} qty   [description]
+	 * @param  {[type]} world [description]
+	 * @return {[type]}       [description]
+	 */
 	base.buy = function(id, qty, world) {
 
 		var obj = _.find(this.specs.items, { id: id });
@@ -55,7 +61,14 @@ function market() {
 			console.error('Not enought money to buy ' + obj.id);
 		}
 	}
-	// Sell an ITEM
+	
+	/**
+	 * [sell description]
+	 * @param  {[type]} id    [description]
+	 * @param  {[type]} qty   [description]
+	 * @param  {[type]} world [description]
+	 * @return {[type]}       [description]
+	 */
 	base.sell = function(id, qty, world) {
 
 		var obj = _.find(this.specs.items, { id: id });
@@ -83,7 +96,12 @@ function market() {
 			};
 		}
 	}
-	// Build the ITEMS list
+	
+	/**
+	 * [build_items description]
+	 * @param  {[type]} world [description]
+	 * @return {[type]}       [description]
+	 */
 	base.build_items = function(world) {
 
 		var items = _.cloneDeep(world.warehouse_inventory);
@@ -109,11 +127,12 @@ function market() {
 
 	}
 
-	// Create the tick trigger..
-	// 	Se il tick è modulo dell'intervallo (300 -> 30 secondi) allora viene ricostruito:
-	// 		- Listino prezzi
-	// 		- Domanda
-	// 		- Offerta
+	/**
+	 * [description]
+	 * @param  {[type]} world [description]
+	 * @param  {[type]} args) {		this.specs.t++;		if(this.specs.t % this.specs.refreshTime [description]
+	 * @return {[type]}       [description]
+	 */
 	base.trigger_add('tick', function(world, args) {
 
 		this.specs.t++;
@@ -127,6 +146,7 @@ function market() {
 		}
 
 	}.bind(base));
+
 
 	_.each(base, function(value, key) { this[key] = value; }.bind(this));
 

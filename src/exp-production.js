@@ -50,39 +50,23 @@ function logic_production(object, info) {
 
 	}
 
-	object.trigger_add('save-export', function(world, args) {
-		args.item.extensions.production = _.cloneDeep(this.production);
+	// Add the before level upgrade watcher
+	// in order to complete the productions or log the previous available stocks
+	object.before_level.push(function(world) {
+		this.history.productions = {
+			productions: _.cloneDeep(this.specs.productions, true)
+		};
 	}.bind(object));
 
-	object.trigger_add('save-load', function(world, args) {
-		args.item.production.active = _.cloneDeep(args.data.extensions.production.active, true);
-		args.item.production.queue = _.cloneDeep(args.data.extensions.production.queue, true);
-		args.item.production.powerups = _.cloneDeep(args.data.extensions.production.powerups, true);
-		return this;
-	}.bind(object));
 
-	// Add Powerup
-	object.trigger_add('production-powerup', function(world, args) {
-		if(_.find(this.powerups, { id: args })) {
-			if(this.production.powerups.indexOf(args) == -1)
-				this.production.powerups.push(args);
-		}
-	}.bind(object));
+	// --------
+	// Powerups
+	// --------
 
-	// Collect All
-	object.trigger_add('production-collect-all', function(world, args) {
-		if(this.production.active.length == 0) return false;
-		var collectionable = _.filter(this.production.active, { completed: true });
-		if(collectionable.length > 0) {
-			console.log("There's " + collectionable.length + " productions to collect!");
-			_.each(collectionable, function(single) {
-				single.collected = true;
-			}.bind(this));
-		} else {
-			console.error("Nothing to collect!");
-		}
-	}.bind(object));
-
+	/**
+	 * [powerups_list description]
+	 * @return {[type]} [description]
+	 */
 	object.powerups_list = function() {
 
 		var pups = [];
@@ -94,6 +78,12 @@ function logic_production(object, info) {
 
 	}.bind(object);
 
+	/**
+	 * [powerup_config description]
+	 * @param  {[type]} config [description]
+	 * @param  {[type]} world  [description]
+	 * @return {[type]}        [description]
+	 */
 	object.powerup_config = function(config, world) {
 
 		var config_powerups = _.filter(this.powerups_list(), { type: 'config' });
@@ -107,6 +97,14 @@ function logic_production(object, info) {
 
 	}
 
+	/**
+	 * [powerup_recipe description]
+	 * @param  {[type]} productionInfos [description]
+	 * @param  {[type]} type            [description]
+	 * @param  {[type]} config          [description]
+	 * @param  {[type]} world           [description]
+	 * @return {[type]}                 [description]
+	 */
 	object.powerup_recipe = function(productionInfos, type, config, world) {
 
 		var powerups = _.filter(this.powerups_list(), { type });
@@ -133,6 +131,179 @@ function logic_production(object, info) {
 		}
 
 	}
+
+	/**
+	 * [can_produce description]
+	 * @param  {[type]} id    [description]
+	 * @param  {[type]} world [description]
+	 * @return {[type]}       [description]
+	 */
+	object.can_produce = function(id, world) {
+
+		var config_local = _.cloneDeep(this.config);
+		object.powerup_config(config_local, world);
+
+		if(this.production.active.length < this.config.production_slots) {
+
+		} else {
+			
+			var queueSize = this.production.queue.length;
+			if(queueSize >= config_local.queue_size)
+				return false;
+		}
+
+
+		var production = _.find(this.specs.productions, { id });
+		if(!production) return false;
+
+		var c = _.cloneDeep(production);
+		this.powerup_recipe(c, 'cost', { keys: [ 'wallet_in', 'warehouse_in' ] }, world);
+		
+		if(world.wallets_recipe(c.wallet_in) && world.warehouse_recipe(c.warehouse_in)) {
+			return true;
+		}
+
+		return false;
+
+	}.bind(object);
+
+	// --------
+	// Triggers
+	// --------
+
+	// Game State > Save:
+	object.trigger_add('save-export', function(world, args) {
+		args.item.extensions.production = _.cloneDeep(this.production);
+	}.bind(object));
+
+	// Game State > Load:
+	object.trigger_add('save-load', function(world, args) {
+		args.item.production.active = _.cloneDeep(args.data.extensions.production.active, true);
+		args.item.production.queue = _.cloneDeep(args.data.extensions.production.queue, true);
+		args.item.production.powerups = _.cloneDeep(args.data.extensions.production.powerups, true);
+	}.bind(object));
+
+
+	// Powerup > Add a Powerup
+	object.trigger_add('production-powerup', function(world, args) {
+		if(_.find(this.powerups, { id: args })) {
+			if(this.production.powerups.indexOf(args) == -1)
+				this.production.powerups.push(args);
+		}
+	}.bind(object));
+
+	// Production > Collect All
+	object.trigger_add('production-collect-all', function(world, args) {
+		if(this.production.active.length == 0) return false;
+		var collectionable = _.filter(this.production.active, { completed: true });
+		if(collectionable.length > 0) {
+			console.log("There's " + collectionable.length + " productions to collect!");
+			_.each(collectionable, function(single) {
+				single.collected = true;
+			}.bind(this));
+		} else {
+			console.error("Nothing to collect!");
+		}
+	}.bind(object));
+
+	// Production > Start
+	object.trigger_add('production-start', function(world, args) {
+
+		var production_payload = _.find(this.specs.productions, { id: args.id });
+
+		if(production_payload) {
+
+			production_payload = _.cloneDeep(production_payload); // --> Hard copy of the `Production Payload` <--
+
+			//
+			// Production Init Powerup:
+			// ------------------------
+
+			// Tick Area: Required tick to accomplish a production task.
+			var tick_powerups = _.filter(this.powerups_list(), { type: 'tick' });
+			if(tick_powerups) {
+				_.each(tick_powerups, function(singlePowerup) {
+					var tof = typeof singlePowerup.value;
+					if(tof == 'number') {
+						production_payload.ticks /= singlePowerup.value;
+					} else if(tof == 'function') {
+						production_payload.ticks = singlePowerup.value(production_payload.ticks, world);
+					}
+				});
+			}
+
+			// Costs Area: Production cost. Usually used to reduction.
+			object.powerup_recipe(production_payload, 'cost', { keys: [ 'wallet_in', 'warehouse_in' ] }, world);
+
+			// Production Config Powerup:
+			// --------------------------
+			var config_local = _.cloneDeep(this.config);
+			object.powerup_config(config_local, world);
+			
+			// >> ! <<  Now the `production_payload` and `config_local` are ready
+	
+			console.log('> Production Start Request: ', args);
+
+			// Check if we match the recipe of costs..
+			if(!world.wallets_recipe(production_payload.wallet_in)) {
+				console.error("You can't afford this payment. (production: " + args.id + ')');
+				return false;
+			}
+
+			// Check if we match the warehouse costs..
+			if(!world.warehouse_recipe(production_payload.warehouse_in)) {
+				console.error("You haven't the required warehouse objects. (production: " + args.id + ')');
+				return false;
+			}
+
+			// Check if we've enought free slots!
+			var activeSlot = this.production.active.length;
+			var queueSize = this.production.queue.length;
+		
+			// Create the JOB Payload:
+			var creationismPayload = {
+
+				productionId: _.uniqueId('production-log-'),
+				
+				id: args.id,
+				tickProduction: production_payload.ticks,
+				progress: 0,
+				tickProgress: 0,
+
+				tickRemain: production_payload.ticks,
+				tickWaste: production_payload.tickWaste ? (production_payload.ticks + production_payload.tickWaste) : 0,
+				completed: false,
+				wasted: false,
+
+				autoCollect: production_payload.autoCollect
+
+			}
+
+			// Queue/Active Production switcher.
+			if(activeSlot < config_local.production_slots) {
+
+				if(world.wallets_pay(production_payload.wallet_in) && world.warehouse_pay(production_payload.warehouse_in)) {
+					this.production.active.push(creationismPayload);
+					console.log('Production Stared.');
+				} else
+					console.error('There was an error with your transaction.');
+
+			} else {
+
+				if(queueSize < config_local.queue_size) {
+					if(world.wallets_pay(production_payload.wallet_in) && world.warehouse_pay(production_payload.warehouse_in))
+						this.production.queue.push(creationismPayload);
+					else
+						console.error('There was an error with your transaction.');
+				} else {
+					console.error('All slots are full!');
+				}
+				
+			}
+
+		}
+
+	}.bind(object));
 
 	// Internal Tick
 	object.trigger_add('tick', function(world, args) {
@@ -260,140 +431,6 @@ function logic_production(object, info) {
 
 	}.bind(object));
 
-
-	// Production Start
-	object.trigger_add('production-start', function(world, args) {
-
-		var production_payload = _.find(this.specs.productions, { id: args.id });
-
-		if(production_payload) {
-
-			production_payload = _.cloneDeep(production_payload); // --> Hard copy of the `Production Payload` <--
-
-			//
-			// Production Init Powerup:
-			// ------------------------
-
-			// Tick Area: Required tick to accomplish a production task.
-			var tick_powerups = _.filter(this.powerups_list(), { type: 'tick' });
-			if(tick_powerups) {
-				_.each(tick_powerups, function(singlePowerup) {
-					var tof = typeof singlePowerup.value;
-					if(tof == 'number') {
-						production_payload.ticks /= singlePowerup.value;
-					} else if(tof == 'function') {
-						production_payload.ticks = singlePowerup.value(production_payload.ticks, world);
-					}
-				});
-			}
-
-			// Costs Area: Production cost. Usually used to reduction.
-			object.powerup_recipe(production_payload, 'cost', { keys: [ 'wallet_in', 'warehouse_in' ] }, world);
-
-			// Production Config Powerup:
-			// --------------------------
-			var config_local = _.cloneDeep(this.config);
-			object.powerup_config(config_local, world);
-			
-			// >> ! <<  Now the `production_payload` and `config_local` are ready
-	
-			console.log('> Production Start Request: ', args);
-
-			// Check if we match the recipe of costs..
-			if(!world.wallets_recipe(production_payload.wallet_in)) {
-				console.error("You can't afford this payment. (production: " + args.id + ')');
-				return false;
-			}
-
-			// Check if we match the warehouse costs..
-			if(!world.warehouse_recipe(production_payload.warehouse_in)) {
-				console.error("You haven't the required warehouse objects. (production: " + args.id + ')');
-				return false;
-			}
-
-			// Check if we've enought free slots!
-			var activeSlot = this.production.active.length;
-			var queueSize = this.production.queue.length;
-		
-			// Create the JOB Payload:
-			var creationismPayload = {
-
-				productionId: _.uniqueId('production-log-'),
-				
-				id: args.id,
-				tickProduction: production_payload.ticks,
-				progress: 0,
-				tickProgress: 0,
-
-				tickRemain: production_payload.ticks,
-				tickWaste: production_payload.tickWaste ? (production_payload.ticks + production_payload.tickWaste) : 0,
-				completed: false,
-				wasted: false,
-
-				autoCollect: production_payload.autoCollect
-
-			}
-
-			// Queue/Active Production switcher.
-			if(activeSlot < config_local.production_slots) {
-
-				if(world.wallets_pay(production_payload.wallet_in) && world.warehouse_pay(production_payload.warehouse_in)) {
-					this.production.active.push(creationismPayload);
-					console.log('Production Stared.');
-				} else
-					console.error('There was an error with your transaction.');
-
-			} else {
-
-				if(queueSize < config_local.queue_size) {
-					if(world.wallets_pay(production_payload.wallet_in) && world.warehouse_pay(production_payload.warehouse_in))
-						this.production.queue.push(creationismPayload);
-					else
-						console.error('There was an error with your transaction.');
-				} else {
-					console.error('All slots are full!');
-				}
-				
-			}
-
-		}
-
-	}.bind(object));
-
-	object.can_produce = function(id, world) {
-
-		var config_local = _.cloneDeep(this.config);
-		object.powerup_config(config_local, world);
-
-		var queueSize = this.production.queue.length;
-		if(queueSize >= config_local.queue_size)
-			return false;
-
-		var production = _.find(this.specs.productions, { id });
-		if(!production) return false;
-
-		var c = _.cloneDeep(production);
-		this.powerup_recipe(c, 'cost', { keys: [ 'wallet_in', 'warehouse_in' ] }, world);
-		
-		if(world.wallets_recipe(c.wallet_in) && world.warehouse_recipe(c.warehouse_in)) {
-			return true;
-		}
-
-		return false;
-
-	}.bind(object);
-
-	// Add the before level upgrade watcher
-	// in order to complete the productions or log the previous available stocks
-	object.before_level.push(function(world) {
-
-		this.history.productions = {
-			productions: _.cloneDeep(this.specs.productions, true)
-		};
-		//console.log(this.specs.productions);
-		//console.log('Lol');
-
-	}.bind(object));
 
 	return object;
 

@@ -5,9 +5,6 @@
 /_/  \_,_/_/ /_/_/_/___/_/_/_/\__(_)_/ /___/
                                   |___/     
 
-
-^_^
-
 */
 
 /**
@@ -75,12 +72,17 @@ function Game(config) {
 
 	this.___config = config;
 	this.base_objects = config.base_objects;
+	this.base_objects_configs = {};
 
-	//////////////////////
-	// Game Status Manager
-	// 
-	// 
-
+	_.each(config.base_objects, function(single) {
+		if(config.base_objects_configs != undefined && config.base_objects_configs[single] != undefined) {
+			this.base_objects_configs[single] = config.base_objects_configs[single];
+		} else {
+			this.base_objects_configs[single] = {
+				max_items: 10
+			};
+		}
+	}.bind(this));
 
 	////////////////////////////
 	// Base Objects Manipolation
@@ -96,6 +98,31 @@ function Game(config) {
 		return this[type] != undefined;
 	}
 
+	this.base_can_add = function(type, subtype) {
+
+		var currentType = subtype;
+		var baseLimit = this.base_objects_configs[type];
+		if(baseLimit == undefined) {
+			console.error("No configuration for this kind of base...");
+			return false;
+		}
+
+		if(this[type].length >= baseLimit.max_items) {
+			console.error("You reached the limit for " + type + " items.");
+			return false;
+		}
+
+		if(baseLimit.types != undefined && baseLimit.types[currentType] != undefined) {
+			if(baseLimit.types[currentType] <= _.filter(this[type], { type: currentType }).length) {
+				console.error("You reached the limit for " + type + " items, " + currentType);
+				return false;		
+			}
+		}
+
+		return true;
+
+	}
+
 	/**
 	 * Insert object in the relative base_type.
 	 * @param	{string}	type
@@ -107,6 +134,25 @@ function Game(config) {
 		if(!this.base_exists(type)) {
 			console.error('There isn\'t a valid container named ' + type);
 			return false;
+		}
+
+		var currentType = object.type;
+		var baseLimit = this.base_objects_configs[type];
+		if(baseLimit == undefined) {
+			console.error("No configuration for this kind of base...");
+			return false;
+		}
+
+		if(this[type].length >= baseLimit.max_items) {
+			console.error("You reached the limit for " + type + " items.");
+			return false;
+		}
+
+		if(baseLimit.types != undefined && baseLimit.types[currentType] != undefined) {
+			if(baseLimit.types[currentType] <= _.filter(this[type], { type: currentType }).length) {
+				console.error("You reached the limit for " + type + " items, " + currentType);
+				return false;		
+			}
 		}
 
 		this[type].push(object);
@@ -195,7 +241,7 @@ function Game(config) {
 				if(i.handler)
 					i.handler(this, args);
 				else
-					console.log('Wof');
+					console.error("Can't find the handler of the object.");
 			}.bind(this));
 		} else {
 			return false;
@@ -317,6 +363,7 @@ function Game(config) {
 	 * @type {array}
 	 */
 	this.warehouse = [];
+	this.warehouse_max = config.warehouse_max || 10;
 
 	/**
 	 * List of Items storable in Warehouse
@@ -331,6 +378,11 @@ function Game(config) {
 	 * @return	{bool}
 	 */
 	this.warehouse_add = function(object_id, quantity) {
+
+		if(this.warehouse.length >= this.warehouse_max) {
+			console.error('Warehouse is full.');
+			return false;
+		}
 
 		if(quantity < 0) return false; // Cant add a negative quantity... i mean.. it's bad :D
 
@@ -455,7 +507,7 @@ function Game(config) {
 	 * Wallet Watcher for level progression
 	 * @type	{string}
 	 */
-	this.level_watcher = config.level_watcher ? config.level_watcher : false;
+	this.level_watcher = config.level_watcher || false;
 
 	/**
 	 * Add a new level to the available
@@ -544,6 +596,8 @@ function Game(config) {
 			}
 
 		} else {
+
+			this.level.tick(tick);
 
 			if(qty >= this.level.range[1]) {
 				
@@ -705,9 +759,9 @@ function wallet(config) {
 		}
 	}
 
-	this.id = config.id ? config.id : _.uniqueId('wallet-');
-	this.quantity = config.quantity ? config.quantity : 0;
-	this.max_quantity = config.max_quantity ? config.max_quantity : 0;
+	this.id = config.id || _.uniqueId('wallet-');
+	this.quantity = config.quantity || 0;
+	this.max_quantity = config.max_quantity || 0;
 	this.float = config.float;
 
 	// Check if there's enought qty for the wallet.

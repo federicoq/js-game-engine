@@ -339,46 +339,25 @@ function umano() {
 		}
 	};
 
-	base.powerups.push(
-		{ id: 'production-double', type: 'profit', value: function(a) { return a*5; } }
-	);
+	// base.powerups.push({ id: 'production-double', type: 'profit', value: function(a) { return a*5; } });
 
-	base.config.self_produce = PRODUCTIONS.humans.point.id;
+	// base.config.self_produce = PRODUCTIONS.humans.point.id;
 
-	base.trigger_add('save-load', function(world, args) {
-		world.trig('production-powerup', this, 'production-double');
-	}.bind(base));
+	// base.trigger_add('save-load', function(world, args) {
+	// 	world.trig('production-powerup', this, 'production-double');
+	// }.bind(base));
 
 	_.each(base, function(value, key) { this[key] = value; }.bind(this));
 
 	return this;
-
-	//logic_mission(base, {});
-
-	/*this.buildings_validate = function(building) {
-		if(building.type == 'land') return true;
-		return false;
-	};*/
-
-
-	/*
-	// Pushing a Production Powerup to the Entity
-	game.trig('production-powerup', _mucca, { id: 'production-cost', type: 'cost', value: 0.5 });
-	game.trig('production-powerup', _mucca, { id: 'production-double', type: 'tick', value: function(a) { return a/5; } });
-	game.trig('production-powerup', _mucca, { id: 'production-profit', type: 'profit', value: 2 });
-	game.trig('production-powerup', _mucca, { id: 'production-slots', type: 'config', value: function(config, world) {
-		config.production_slots *= 2;
-		config.queue_size *= 2;
-		return config;
-	} });
-	 */
 
 }
 
 var game_config = {
 	base_objects: ['humans', 'buildings', 'machines'],
 	level_watcher: 'exp',
-	warehouse_inventory: inventory_archive
+	warehouse_inventory: inventory_archive,
+	warehouse_max: 1000
 };
 
 

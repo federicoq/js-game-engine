@@ -1,7 +1,7 @@
 <template>
 	<div>
 
-		<h4>Warehouse</h4>
+		<h4>Warehouse <small>{{w.warehouse_max}}</small></h4>
 		<i-table>
 			<table class="_width-100">
 				<thead>
