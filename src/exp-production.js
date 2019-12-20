@@ -156,6 +156,14 @@ function logic_production(object, info) {
 		var production = _.find(this.specs.productions, { id });
 		if(!production) return false;
 
+		if(production.level) {
+			var minReq = _.find(world.levels, { id: production.level });
+			if(minReq) {
+				if(world.level.position < minReq.position)
+					return false;
+			}
+		}
+
 		var c = _.cloneDeep(production);
 		this.powerup_recipe(c, 'cost', { keys: [ 'wallet_in', 'warehouse_in' ] }, world);
 		
@@ -164,6 +172,19 @@ function logic_production(object, info) {
 		}
 
 		return false;
+
+	}.bind(object);
+
+	object.level_of = function(productionId, world) {
+
+		var production = _.find(this.specs.productions, { id: productionId });
+		if(production) {
+			var productionRef = _.find(world.levels, { id: production.level });
+
+			return productionRef;
+		}
+
+		return productionId;
 
 	}.bind(object);
 
@@ -275,7 +296,7 @@ function logic_production(object, info) {
 				completed: false,
 				wasted: false,
 
-				autoCollect: production_payload.autoCollect
+				autoCollect: this.config.self_produce != false ? true : production_payload.autoCollect
 
 			}
 
@@ -424,7 +445,6 @@ function logic_production(object, info) {
 
 		// If the item is a self productor.. it's a good thing :)
 		if(this.config.self_produce != false && this.production.queue.length < this.config.queue_size) {
-			//console.log('Uhm?');
 			if(this.can_produce(this.config.self_produce, world))
 				world.trig('production-start', this, { id: this.config.self_produce });
 		}

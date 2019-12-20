@@ -3,6 +3,282 @@
 // 
 // 
 
+var addLevel_0 = function(g) {
+
+	var level_0 = new level({
+		id: 'level_0',
+		position: 0,
+		name: 'Tutorial',
+		description: 'Tutorial',
+		range: [ 0, 999 ],
+		activate: function(world) {},
+		deactivate: function(world) {},
+		tick: function(tick, world) {}
+	});
+
+	g.level_add(level_0);
+
+	var story_teller = _.find(g.humans, { type: 'storyteller' });
+
+	// TUTORIAL MISSIONS
+	// -----------------
+	story_teller.missions.push({
+		id: 'mission-tutorial-1-0',
+		name: 'Crea una `Piantagione`',
+		description: '!',
+		request: {
+			level: 'level_0',
+			base_objects: {
+				buildings: [ { type: 'piantagione', quantity: 1 } ]
+			}
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ]
+		}
+	});
+
+	story_teller.missions.push({
+		required: [ 'mission-tutorial-1-0' ],
+		id: 'mission-tutorial-1-0-1',
+		name: 'Crea 2 x `Grano` e 1 x Mais',
+		description: '!',
+		request: {
+			warehouse: [ { id: 'grano', quantity: 2 }, { id: 'mais', quantity: 1 } ]
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ],
+			warehouse: [ { id: 'grano', quantity: 2 }, { id: 'mais', quantity: 1 } ]
+		}
+	});
+
+	story_teller.missions.push({
+		required: [ 'mission-tutorial-1-0-1' ],
+		id: 'mission-tutorial-1-1',
+		name: 'Crea una `Fattoria`',
+		description: '!',
+		request: {
+			level: 'level_0',
+			base_objects: {
+				buildings: [ { type: 'fattoria', quantity: 1 } ]
+			}
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ]
+		}
+	});
+
+	story_teller.missions.push({
+		required: [ 'mission-tutorial-1-1' ],
+		id: 'mission-tutorial-1-1-1',
+		name: 'Crea 1x`Mangime per Mucche`',
+		description: '!',
+		request: {
+			warehouse: [ { id: 'mangime-mucche', quantity: 1 } ]
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ],
+			warehouse: [ { id: 'mangime-mucche', quantity: 1 } ]
+		}
+	});
+
+	story_teller.missions.push({
+		required: [ 'mission-tutorial-1-1-1' ],
+		id: 'mission-tutorial-1-2',
+		name: 'Crea un `Allevamento`',
+		description: '!',
+		request: {
+			level: 'level_0',
+			base_objects: {
+				buildings: [ { type: 'allevamento', quantity: 1 } ]
+			}
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ]
+		}
+	});
+
+	story_teller.missions.push({
+		required: [ 'mission-tutorial-1-2' ],
+		id: 'mission-tutorial-1-2-1',
+		name: 'Crea 1x`Latte`',
+		description: '!',
+		request: {
+			warehouse: [ { id: 'latte', quantity: 1 } ]
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ],
+			warehouse: [ { id: 'latte', quantity: 1 } ]
+		}
+	});
+
+	story_teller.missions.push({
+		required: [ 'mission-tutorial-1-2' ],
+		id: 'mission-tutorial-1-3',
+		name: 'Crea 1 nuova `Piantagione` e produci 3x `latte`',
+		description: '!',
+		request: {
+			level: 'level_0',
+			base_objects: {
+				buildings: [ { type: 'piantagione', quantity: 2 } ]
+			},
+			warehouse: [ { id: 'latte', quantity: 3 } ]
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 400 } ]
+		}
+	});
+
+}
+
+var addLevel_1 = function(g) {
+
+	var level_1 = new level({
+		id: 'level_1',
+		position: 1,
+		name: 'Tutorial',
+		description: 'Tutorial',
+		range: [ 1000, 2000 ],
+		activate: function(world) {
+
+			world.wallet('exp').max_quantity = 10000;
+
+		},
+		deactivate: function(world) {},
+		tick: function(tick, world) {}
+	});
+
+	var story_teller = _.find(g.humans, { type: 'storyteller' });
+
+	story_teller.missions.push({
+		id: 'mission-tutorial-2-0',
+		name: 'Crea un `Contadino`',
+		description: '!',
+		request: {
+			level: 'level_1',
+			base_objects: {
+				buildings: [ { type: 'contadino', quantity: 1 } ]
+			}
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ]
+		}
+	});
+
+	story_teller.missions.push({
+		id: 'mission-tutorial-2-1',
+		required: [ 'mission-tutorial-2-0' ],
+		name: 'Crea un `Mangime per Galline`',
+		description: '!',
+		request: {
+			level: 'level_1',
+			warehouse: [ { id: 'mangime-galline', quantity: 1 } ]
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ],
+			warehouse: [ { id: 'mangime-galline', quantity: 1 } ]
+		}
+	});
+
+	story_teller.missions.push({
+		id: 'mission-tutorial-2-2',
+		required: [ 'mission-tutorial-2-1' ],
+		name: 'Crea un `Uovo`',
+		description: '!',
+		request: {
+			level: 'level_1',
+			warehouse: [ { id: 'uovo', quantity: 1 } ]
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ],
+			warehouse: [ { id: 'uovo', quantity: 1 } ]
+		}
+	});
+
+	story_teller.missions.push({
+		id: 'mission-tutorial-2-3',
+		required: [ 'mission-tutorial-2-2' ],
+		name: 'Crea un `Caseificio`',
+		description: '!',
+		request: {
+			level: 'level_1',
+			base_objects: {
+				buildings: [ { type: 'caseificio', quantity: 1 } ]
+			}
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ]
+		}
+	});
+
+	story_teller.missions.push({
+		id: 'mission-tutorial-2-4',
+		required: [ 'mission-tutorial-2-3' ],
+		name: 'Crea 5x`Mozzarella`',
+		description: '!',
+		request: {
+			level: 'level_1',
+			warehouse: [ { id: 'mozzarella', quantity: 5 } ]
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 600 } ]
+		}
+	});
+
+	g.level_add(level_1);
+
+}
+
+var addLevel_2 = function(g) {
+
+	var level_2 = new level({
+		id: 'level_2',
+		position: 2,
+		name: 'Primo Vero Livello',
+		description: 'Yeeh!',
+		range: [ 2000, 3000 ],
+		activate: function(world) {
+
+			world.wallet('money').add(1000);
+			world.wallet('gold').add(5);
+
+
+			var piantagioni = _.filter(world.buildings, { type: 'piantagione' });
+
+			piantagioni[0].config.self_produce = PRODUCTIONS.piantagione.grano.id;
+			piantagioni[0].config.queue_size = 1;
+			
+			piantagioni[1].config.self_produce = PRODUCTIONS.piantagione.mais.id;
+			piantagioni[1].config.queue_size = 1;
+
+			//world.buildings.self_produce = PRODUCTIONS.humans.point.id;
+
+
+		},
+		deactivate: function(world) {},
+		tick: function(tick, world) {}
+	});
+
+	var story_teller = _.find(g.humans, { type: 'storyteller' });
+
+	story_teller.missions.push({
+		id: 'level-2-0',
+		name: 'Crea il tuo `negozio`',
+		description: '!',
+		request: {
+			level: 'level_2',
+			base_objects: {
+				buildings: [ { type: 'allevamento', quantity: 1 } ] // negozio
+			}
+		},
+		rewards: {
+			wallets: [ { id: 'exp', quantity: 100 } ]
+		}
+	});
+
+	g.level_add(level_2);
+
+}
+
 var inventory_archive = [
 	{
 		id: "grano",
@@ -42,11 +318,17 @@ var inventory_archive = [
 		market: { wallets: [ { id: 'money', quantity: 6 } ] }
 	},
 	{
-		id: 'uova',
-		name: 'Uova',
+		id: 'uovo',
+		name: 'Uovo',
 		description: "Mangime Galline + Contadino",
 		market: { wallets: [ { id: 'money', quantity: 10 } ] }
 	},
+	{
+		id: 'mozzarella',
+		name: 'mozzarella',
+		description: "Prodotto del caseificio",
+		market: { wallets: [ { id: 'money', quantity: 15 } ] }
+	}
 ];
 
 var BUILDINGS = [
@@ -55,7 +337,7 @@ var BUILDINGS = [
 		name: 'Piantagione',
 		type: 'piantagione',
 		price: function(level) {
-			return 5;
+			return 5 * (1 + level.position);
 		}
 	},
 	{
@@ -63,7 +345,7 @@ var BUILDINGS = [
 		name: 'Allevamento',
 		type: 'allevamento',
 		price: function(level) {
-			return 20;
+			return 20 * (1 + level.position);
 		}
 	},
 	{
@@ -71,7 +353,7 @@ var BUILDINGS = [
 		name: 'Contadino',
 		type: 'contadino',
 		price: function(level) {
-			return 20;
+			return 20 * (1 + level.position);
 		}
 	},
 	{
@@ -79,10 +361,20 @@ var BUILDINGS = [
 		name: 'Fattoria',
 		type: 'fattoria',
 		price: function(level) {
-			return 20;
+			return 20 * (1 + level.position);
 		}
-	},
+	},{
+		id: 'caseificio',
+		name: 'Caseificio',
+		type: 'caseificio',
+		level: 1,
+		price: function(level) {
+			return 20 * (1 + level.position);
+		}
+	}
 ];
+
+timeRatio = 0.05;
 
 var PRODUCTIONS = {
 	piantagione: {
@@ -91,8 +383,9 @@ var PRODUCTIONS = {
 			name: 'Produci Grano',
 			warehouse_out: [ { id: 'grano', quantity: 1 } ],
 			wallet_out: [ { id: 'exp', quantity: 0.1 } ],
-			ticks: 100,
+			ticks: 100 * timeRatio,
 			autoCollect: false,
+			level: 'level_0',
 			tickWaste: 5000
 		},
 		mais: {
@@ -100,8 +393,19 @@ var PRODUCTIONS = {
 			name: 'Produci Mais',
 			warehouse_out: [ { id: 'mais', quantity: 1 } ],
 			wallet_out: [ { id: 'exp', quantity: 0.1 } ],
-			ticks: 100,
+			ticks: 100 * timeRatio,
 			autoCollect: false,
+			level: 'level_0',
+			tickWaste: 5000
+		},
+		carote: {
+			id: 'production-carote',
+			name: 'Produci Carote',
+			warehouse_out: [ { id: 'carote', quantity: 1 } ],
+			wallet_out: [ { id: 'exp', quantity: 0.1 } ],
+			ticks: 200 * timeRatio,
+			autoCollect: false,
+			level: 'level_1',
 			tickWaste: 5000
 		}
 	},
@@ -112,8 +416,9 @@ var PRODUCTIONS = {
 			warehouse_in: [ { id: 'mais', quantity: 1 }, { id: 'grano', quantity: 2 } ],
 			warehouse_out: [ { id: 'mangime-mucche', quantity: 1 } ],
 			wallet_out: [ { id: 'exp', quantity: 0.1 } ],
-			ticks: 200,
+			ticks: 200 * timeRatio,
 			autoCollect: false,
+			level: 'level_0',
 			tickWaste: 5000
 		},
 		mangime_galline: {
@@ -122,21 +427,23 @@ var PRODUCTIONS = {
 			warehouse_in: [ { id: 'mais', quantity: 2 }, { id: 'grano', quantity: 1 } ],
 			warehouse_out: [ { id: 'mangime-galline', quantity: 1 } ],
 			wallet_out: [ { id: 'exp', quantity: 0.1 } ],
-			ticks: 200,
+			ticks: 200 * timeRatio,
 			autoCollect: false,
+			level: 'level_1',
 			tickWaste: 5000
 		}
 	},
 	contadino: {
-		uova: {
-			id: 'production-uova',
-			name: 'Produci Uova',
+		uovo: {
+			id: 'production-uovo',
+			name: 'Produci Uovo',
 			warehouse_in: [ { id: 'mangime-galline', quantity: 1 } ],
-			warehouse_out: [ { id: 'uova', quantity: 1 } ],
+			warehouse_out: [ { id: 'uovo', quantity: 1 } ],
 			wallet_out: [ { id: 'exp', quantity: 0.1 } ],
-			ticks: 300,
+			ticks: 300 * timeRatio,
 			autoCollect: false,
-			tickWaste: 0
+			tickWaste: 0,
+			level: 'level_1',
 		}
 	},
 	allevamento: {
@@ -146,8 +453,22 @@ var PRODUCTIONS = {
 			warehouse_in: [ { id: 'mangime-mucche', quantity: 1 } ],
 			warehouse_out: [ { id: 'latte', quantity: 1 } ],
 			wallet_out: [ { id: 'exp', quantity: 0.1 } ],
-			ticks: 300,
+			ticks: 300 * timeRatio,
 			autoCollect: false,
+			level: 'level_0',
+			tickWaste: 0
+		}
+	},
+	caseificio: {
+		mozzarella: {
+			id: 'production-mozzarella',
+			name: 'Produci Mozzarella',
+			warehouse_in: [ { id: 'latte', quantity: 2 } ],
+			warehouse_out: [ { id: 'mozzarella', quantity: 1 } ],
+			wallet_out: [ { id: 'exp', quantity: 0.1 } ],
+			ticks: 600 * timeRatio,
+			autoCollect: false,
+			level: 'level_0',
 			tickWaste: 0
 		}
 	}
@@ -217,8 +538,6 @@ function extendGame(game) {
 	game.wallet_add(exp);
 	game.wallet_add(gold);
 	game.wallet_add(pollution);
-
-	game.level_add(level_0);
 	
 }
 
@@ -231,10 +550,13 @@ function journey() {
 		type: "storyteller"
 	});
 
-	logic_mission(base, {auto_mission: true});
-
 	base.component = 'humanStoryteller';
+	base.threejs = 'humanStorytellerThree';
 
+	logic_mission(base, {auto_mission: false});
+
+	// Manger of Buildings
+	// -------------------
 	base.building_add = function(world, id) {
 		var obj = _.find(this.buildings, { id: id });
 		if(obj) {
@@ -242,7 +564,6 @@ function journey() {
 			world.building_add(raw);
 			world.wallet('money').rem(obj.price(world.level));
 		}
-
 	}.bind(base);
 
 	base.building_remove = function(world, id) {}
@@ -251,6 +572,12 @@ function journey() {
 		var obj = _.find(this.buildings, { id: id });
 
 		var price = obj.price(world.level);
+
+		if(obj.level != undefined) {
+			if(world.level.position < obj.level)
+				return false;
+		}
+
 		if(world.wallet('money').quantity >= price && world.base_can_add('buildings', obj.type)) {
 			return true;
 		}
@@ -258,6 +585,8 @@ function journey() {
 		return false;
 	}
 
+	// Trigger: Add new Building
+	// -------------------------
 	base.trigger_add('building-add', function(world, args) {
 		if(this.building_can(world, args.id)) {
 			this.building_add(world, args.id);
@@ -266,6 +595,7 @@ function journey() {
 		}
 
 	}.bind(base));
+
 
 	base.buildings = BUILDINGS;
 
@@ -293,6 +623,7 @@ function piantagione() {
 
 	base.specs.productions.push(PRODUCTIONS.piantagione.grano);
 	base.specs.productions.push(PRODUCTIONS.piantagione.mais);
+	base.specs.productions.push(PRODUCTIONS.piantagione.carote);
 
 	_.each(base, function(value, key) { this[key] = value; }.bind(this));
 
@@ -365,7 +696,31 @@ function contadino() {
 		productions: []
 	});
 
-	base.specs.productions.push(PRODUCTIONS.contadino.uova);
+	base.specs.productions.push(PRODUCTIONS.contadino.uovo);
+
+	_.each(base, function(value, key) { this[key] = value; }.bind(this));
+
+	return this;
+
+}
+
+function caseificio() {
+
+	var base = new baseBuilding({
+		name: "Caseificio",
+		help: "Questo edificio lavora i derivati dell'allevamento",
+		type: 'caseificio'
+	});
+
+	logic_production(base, {
+		config: {
+			production_slots: 1,
+			queue_size: 1
+		},
+		productions: []
+	});
+
+	base.specs.productions.push(PRODUCTIONS.caseificio.mozzarella);
 
 	_.each(base, function(value, key) { this[key] = value; }.bind(this));
 
@@ -391,51 +746,26 @@ var game_config = {
 	}
 };
 
-
-var level_0 = new level({
-	id: 'level_0',
-	name: 'Tutorial',
-	description: 'Tutorial',
-	range: [ 0, 100 ],
-	activate: function(world) {
-
-		// var buildings = [];
-
-		// for(var a = 0; a < 3; a++)
-		// 	buildings.push(new piantagione());
-
-		// buildings.push(new allevamento());
-		// buildings.push(new contadino());
-		// buildings.push(new fattoria());
-		
-		// _.each(buildings, function(single) {
-		// 	world.building_add(single);
-		// });
-
-		var humans = [];
-		humans.push(new journey());
-
-		_.each(humans, function(single) {
-			world.human_add(single);
-		});	
-
-	},
-	deactivate: function(world) {},
-	tick: function(tick, world) {
-	}
-});
-
 var save_manager = new SaveManager({
 	game_token: 'blank-game',
 	version: 1,
 	//from_
-	init: function() {
+	init: function(second) {
 
 		game = new Game(game_config);
 		extendGame(game);
 
+		if(!second) {
+			game.human_add(new journey());
+		}
+
 		return game;
 
+	},
+	ready: function(game) {
+		addLevel_0(game);
+		addLevel_1(game);
+		addLevel_2(game);
 	}
 });
 

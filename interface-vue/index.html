@@ -13,12 +13,20 @@
 
 			<i-container>
 				<i-row>
-					<i-column md="6">
-						<i-button @click.prevent="save">Save {{world._s.tick}} {{world.level.id}}</i-button>
+					<i-column md="4">
+						<div class="_margin-top-2">
+							<i-button @click.prevent="save">Save {{world._s.tick}} {{world.level.id}}</i-button>
+							<pre class="_margin-top-1">{{world.level}}</pre>
+							<i-button @click.prevent="world.wallet('exp').add(50)">+ 50 exp</i-button>
+							<i-button @click.prevent="world.wallet('exp').rem(50)">- 50 exp</i-button>
+							<i-button @click.prevent="magic">magic</i-button>
+						</div>
+					</i-column>
+					<i-column md="4">
 						<wallets :wallets="world.wallets"></wallets>
 						
 					</i-column>
-					<i-column md="6">
+					<i-column md="4">
 						<warehouse :warehouse="world.warehouse"></warehouse>
 					</i-column>
 				</i-row>

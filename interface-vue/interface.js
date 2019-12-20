@@ -16,13 +16,26 @@ Vue.mixin({
 		}
 	},
 	methods: {
-		recipe: function(data) {
+		recipe: function(data, type) {
 
-			var output = '';
+			var output = '<pre>';
 
 			_.map(data, function(u) {
-				output += '<code>'+u.id+': <strong>'+u.quantity+'</strong></code>';
-			});
+				output += ''+u.id+': <strong>'+u.quantity+'</strong>';
+				if(type) {
+					if(type == 'wallet') {
+						var diff = this.w.wallet(u.id).quantity - u.quantity;
+						output += this.w.wallet(u.id).has(u.quantity) ? ' •' : ' <small>('+diff+')</small>'
+					}
+					else if(type == 'warehouse') {
+						var diff = this.w.warehouse_has(u.id) - u.quantity;
+						output += this.w.warehouse_has(u.id) >= u.quantity ? ' •' : ' <small>('+diff+')</small>'
+					}
+				}
+				output += "\n";
+			}.bind(this));
+
+			output += '</pre>';
 
 			return output;
 			
@@ -40,6 +53,16 @@ var app = new Vue({
 	methods: {
 		save: function() {
 			save_manager.store_session();
+		},
+		magic: function() {
+
+			this.w.wallet('money').add(100);
+			this.w.warehouse_add('grano', 10);
+			this.w.warehouse_add('mais', 10);
+			this.w.warehouse_add('mangime-mucche', 10);
+			this.w.warehouse_add('latte', 10);
+			this.w.warehouse_add('mozzarella', 10);
+
 		}
 	},
 	data: {

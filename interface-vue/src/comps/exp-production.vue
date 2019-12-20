@@ -67,10 +67,9 @@
 		<hr />
 
 		<i-list-group size="sm">
-			<i-list-group-item v-for="production in object.specs.productions" :key="production.id">
+			<i-list-group-item v-for="production in object.specs.productions" :key="production.id" v-if="object.level_of(production.id, w).position <= w.level.position">
 				
 				<i-button size="md" variant="success" :disabled="!object.can_produce(production.id, w)" @click.prevent="w.trig('production-start', w.base_get(type, object.id), { id: production.id })">Produce {{ production.name }}</i-button>
-				
 				<hr />
 
 				<i-container>
@@ -80,12 +79,12 @@
 
 								<div v-if="production.warehouse_in && production.warehouse_in.length > 0">
 									<i-badge>Warehouse Costs</i-badge><br />
-									<span v-html="recipe(production.warehouse_in)"></span>
+									<span v-html="recipe(production.warehouse_in, 'warehouse')"></span>
 								</div>
 
 								<div v-if="production.wallet_in && production.wallet_in.length > 0">
 									<i-badge>Wallets Costs</i-badge><br />
-									<span v-html="recipe(production.wallet_in)"></span>
+									<span v-html="recipe(production.wallet_in, 'wallet')"></span>
 								</div>
 							</div>
 						</i-column>

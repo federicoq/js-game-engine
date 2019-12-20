@@ -132,7 +132,7 @@ function SaveManager(config) {
 	this.load_session = function(session) {
 
 		var d = session.data;
-		var game = this.config.init();
+		var game = this.config.init(true);
 
 		game._s.tick = d.current_tick;
 
@@ -177,9 +177,12 @@ function SaveManager(config) {
 
 		}.bind(this));
 
+		this.config.ready(game);
+		
 		// Restore Level
 		// -------------
 		game.level = _.cloneDeep(_.find(game.levels, { id: d.level_id }));
+
 
 		return game;
 
@@ -210,7 +213,10 @@ function SaveManager(config) {
 	var session_game = this.session_exists('game');
 
 	if(session_game) this.game = session_game;
-	else this.game = this.config.init();
+	else {
+		this.game = this.config.init();
+		this.config.ready(this.game);
+	}
 
 
 	return this;

@@ -2,7 +2,7 @@
 	<div class="_margin-top-1">
 
 		<strong>Missions</strong>
-
+		<pre>{{object.mission_completed}}</pre>
 		<i-list-group size="sm">
 			<i-list-group-item v-for="mission in object.mission.active" :key="mission.id">
 				<pre>{{ mission }}</pre>
