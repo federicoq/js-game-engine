@@ -1,5 +1,6 @@
 // Interface Layer
 var base = '/interface-vue/src/';
+var threeBase = '/three/src/';
 
 Vue.mixin({
 	computed: {
@@ -45,6 +46,7 @@ Vue.mixin({
 
 var app = new Vue({
 	components: {
+		threeScene: httpVueLoader(threeBase + 'scene.vue'),
 		baseObject: httpVueLoader(base + 'comps/base-object.vue'),
 		wallets: httpVueLoader(base + 'comps/wallets.vue'),
 		warehouse: httpVueLoader(base + 'comps/warehouse.vue')

@@ -374,7 +374,7 @@ var BUILDINGS = [
 	}
 ];
 
-timeRatio = 0.05;
+timeRatio = 1;
 
 var PRODUCTIONS = {
 	piantagione: {
@@ -386,7 +386,7 @@ var PRODUCTIONS = {
 			ticks: 100 * timeRatio,
 			autoCollect: false,
 			level: 'level_0',
-			tickWaste: 5000
+			tickWaste: 20
 		},
 		mais: {
 			id: 'production-mais',
@@ -612,6 +612,8 @@ function piantagione() {
 		help: "Questo edificio produce materie prime.",
 		type: "piantagione"
 	});
+
+	base.threejs = 'piantagioneThree';
 
 	logic_production(base, {
 		config: {
